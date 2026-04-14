@@ -1,0 +1,138 @@
+<script setup>
+import { ref, watch } from 'vue'
+import { leadsService } from '@/services/leads.service'
+import { useToast } from '@/composables/useToast'
+import BaseModal from '@/components/ui/BaseModal.vue'
+import BaseSelect from '@/components/ui/BaseSelect.vue'
+import { SERVICE_TYPES, PRIORITY_LEVELS, ANIMAL_SPECIES } from '@/utils/constants'
+
+const props = defineProps({
+  show:   { type: Boolean, default: false },
+  lead:   { type: Object, default: null },   // null = crear
+})
+const emit = defineEmits(['close', 'saved'])
+
+const { addToast } = useToast()
+
+const form = ref({
+  client_name:     '',
+  client_phone:    '',
+  client_email:    '',
+  region:          '',
+  comuna:          '',
+  address:         '',
+  animal_name:     '',
+  animal_species:  '',
+  animal_breed:    '',
+  animal_sex:      '',
+  service_type:    '',
+  description:     '',
+  priority:        'normal',
+})
+
+const saving = ref(false)
+
+watch(() => props.show, (v) => {
+  if (v && props.lead) {
+    form.value = {
+      client_name:    props.lead.client?.name || '',
+      client_phone:   props.lead.client?.phone || '',
+      client_email:   props.lead.client?.email || '',
+      region:         props.lead.client?.region || '',
+      comuna:         props.lead.client?.comuna || '',
+      address:        props.lead.client?.address || '',
+      animal_name:    props.lead.animal?.name || '',
+      animal_species: props.lead.animal?.species || '',
+      animal_breed:   props.lead.animal?.breed || '',
+      animal_sex:     props.lead.animal?.sex || '',
+      service_type:   props.lead.service_type || '',
+      description:    props.lead.description || '',
+      priority:       props.lead.priority || 'normal',
+    }
+  }
+})
+
+async function save() {
+  saving.value = true
+  try {
+    const payload = {
+      client_id:  props.lead?.client_id,
+      animal_id:  props.lead?.animal_id,
+      service_type: form.value.service_type,
+      description:  form.value.description,
+      priority:     form.value.priority,
+    }
+    if (!props.lead) {
+      // Crear cliente + animal + lead via edge function would be ideal
+      // But for manual creation, we use the service directly
+      await leadsService.create(payload)
+    } else {
+      // Update existing lead
+      const { supabase } = await import('@/services/supabase')
+      await supabase.from('leads').update(payload).eq('id', props.lead.id)
+    }
+    addToast('Lead guardado', 'success')
+    emit('saved')
+    emit('close')
+  } catch (e) {
+    addToast('Error al guardar: ' + e.message, 'error')
+  } finally {
+    saving.value = false
+  }
+}
+</script>
+
+<template>
+  <BaseModal :show="show" :title="lead ? 'Editar Lead' : 'Nuevo Lead'" size="lg" @close="$emit('close')">
+    <form @submit.prevent="save" class="space-y-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="label-base">Nombre cliente *</label>
+          <input v-model="form.client_name" type="text" class="input-base" required />
+        </div>
+        <div>
+          <label class="label-base">Teléfono *</label>
+          <input v-model="form.client_phone" type="text" class="input-base" placeholder="+56..." required />
+        </div>
+        <div>
+          <label class="label-base">Email</label>
+          <input v-model="form.client_email" type="email" class="input-base" />
+        </div>
+        <div>
+          <label class="label-base">Región</label>
+          <input v-model="form.region" type="text" class="input-base" />
+        </div>
+        <div>
+          <label class="label-base">Comuna</label>
+          <input v-model="form.comuna" type="text" class="input-base" />
+        </div>
+        <div class="md:col-span-2">
+          <label class="label-base">Dirección</label>
+          <input v-model="form.address" type="text" class="input-base" />
+        </div>
+        <div>
+          <label class="label-base">Nombre animal *</label>
+          <input v-model="form.animal_name" type="text" class="input-base" required />
+        </div>
+        <BaseSelect label="Especie" v-model="form.animal_species" :options="ANIMAL_SPECIES" />
+        <div>
+          <label class="label-base">Raza</label>
+          <input v-model="form.animal_breed" type="text" class="input-base" />
+        </div>
+        <BaseSelect label="Sexo" v-model="form.animal_sex" :options="[{value:'macho',label:'Macho'},{value:'hembra',label:'Hembra'},{value:'desconocido',label:'Desconocido'}]" />
+        <BaseSelect label="Servicio" v-model="form.service_type" :options="SERVICE_TYPES" />
+        <BaseSelect label="Prioridad" v-model="form.priority" :options="PRIORITY_LEVELS" />
+        <div class="md:col-span-2">
+          <label class="label-base">Descripción</label>
+          <textarea v-model="form.description" class="input-base" rows="3" />
+        </div>
+      </div>
+      <div class="flex justify-end gap-3 pt-2">
+        <button type="button" class="btn-secondary" @click="$emit('close')">Cancelar</button>
+        <button type="submit" class="btn-primary" :disabled="saving">
+          {{ saving ? 'Guardando...' : 'Guardar' }}
+        </button>
+      </div>
+    </form>
+  </BaseModal>
+</template>

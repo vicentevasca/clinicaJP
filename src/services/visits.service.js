@@ -21,4 +21,18 @@ export const visitsService = {
     if (error) throw error
     return data
   },
+
+  async updateStatus(id, status) {
+    const { data, error } = await supabase
+      .from('visits').update({ status }).eq('id', id).select().single()
+    if (error) throw error
+    return data
+  },
+
+  async create(payload) {
+    const { data, error } = await supabase
+      .from('visits').insert(payload).select().single()
+    if (error) throw error
+    return data
+  },
 }

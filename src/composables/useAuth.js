@@ -5,5 +5,6 @@ export function useAuth() {
   const store = useAuthStore()
   const { user, profile, loading, isAdmin, isTecnico, isLoggedIn } = storeToRefs(store)
   return { user, profile, loading, isAdmin, isTecnico, isLoggedIn,
-           login: store.login, logout: store.logout }
+           login: store.login, logout: store.logout,
+           refreshProfile: store.loadProfile }
 }
