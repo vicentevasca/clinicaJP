@@ -49,12 +49,10 @@ const maxStatus = computed(() => Math.max(...Object.values(byStatus.value), 1))
 
 onMounted(async () => {
   try {
+    const from = periods[period.value]
     const [leadsData, visitsData] = await Promise.all([
       leadsService.getAll(),
-      visitsService.getByRange(
-        periods['30d'].toISOString(),
-        now.toISOString()
-      ),
+      visitsService.getByRange(from.toISOString(), now.toISOString()),
     ])
     leads.value  = leadsData
     visits.value = visitsData

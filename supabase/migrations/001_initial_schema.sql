@@ -60,7 +60,7 @@ CREATE TABLE leads (
   priority            TEXT DEFAULT 'normal' CHECK (priority IN ('low','normal','high','urgent')),
   confidence_score    INTEGER DEFAULT 50 CHECK (confidence_score BETWEEN 0 AND 100),
   source              TEXT DEFAULT 'web_form'
-                        CHECK (source IN ('web_form','telegram','whatsapp','phone','referral')),
+                        CHECK (source IN ('web_form','telegram','whatsapp','phone','referral','mi_mascota_portal')),
   inventory_checked   BOOLEAN DEFAULT FALSE,
   inventory_ok        BOOLEAN,
   telegram_message_id BIGINT,

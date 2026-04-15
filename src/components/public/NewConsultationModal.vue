@@ -1,7 +1,6 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { portalService } from '@/services/portal.service'
-import SlotCalendar from './SlotCalendar.vue'
 import BaseModal from '@/components/ui/BaseModal.vue'
 
 const props = defineProps({
@@ -22,34 +21,18 @@ const serviceOptions = [
   { value: 'otro', label: '❓ Otro' },
 ]
 
+const step = ref('form') // 'form' | 'success'
+
 const form = ref({
   service_type: '',
   description: '',
-  priority: 'normal',
-  preferred_date: null,
-  preferred_time_slot: null,
 })
 
 const loading = ref(false)
 const error = ref('')
 
-const selectedSlot = computed({
-  get: () => ({ date: form.value.preferred_date, time_slot: form.value.preferred_time_slot }),
-  set: (val) => {
-    form.value.preferred_date = val?.date || null
-    form.value.preferred_time_slot = val?.time_slot || null
-  },
-})
-
-const isValid = computed(() =>
-  form.value.service_type &&
-  form.value.description.trim().length >= 10 &&
-  form.value.preferred_date &&
-  form.value.preferred_time_slot
-)
-
 async function handleSubmit() {
-  if (!isValid.value) return
+  if (!form.value.service_type || !form.value.description.trim()) return
   loading.value = true
   error.value = ''
   try {
@@ -58,73 +41,91 @@ async function handleSubmit() {
       animal_id: props.animal.id,
       service_type: form.value.service_type,
       description: form.value.description,
-      priority: form.value.priority,
-      preferred_date: form.value.preferred_date,
-      preferred_time_slot: form.value.preferred_time_slot,
     })
+    step.value = 'success'
     emit('success')
-    emit('close')
   } catch (e) {
     error.value = e.message
   } finally {
     loading.value = false
   }
 }
+
+function handleClose() {
+  step.value = 'form'
+  form.value = { service_type: '', description: '' }
+  emit('close')
+}
 </script>
 
 <template>
-  <BaseModal :show="show" title="Nueva consulta" size="lg" @close="$emit('close')">
-    <p class="text-sm text-slate-400 mb-5">{{ animal.name }} · {{ client.name }}</p>
+  <BaseModal size="md" :show="show" @close="handleClose">
+    <!-- Success state -->
+    <div v-if="step === 'success'" class="text-center py-6">
+      <div class="text-5xl mb-4">✅</div>
+      <h3 class="text-xl font-bold text-white mb-2">¡Solicitud enviada!</h3>
+      <p class="text-slate-400 text-sm mb-6">
+        Hemos recibido tu solicitud para <strong class="text-white">{{ animal.name }}</strong>.
+        Te contactaremos a la brevedad para coordinar la visita.
+      </p>
+      <button type="button" @click="handleClose" class="btn-primary w-full justify-center">
+        Entendido
+      </button>
+    </div>
 
-    <!-- Form -->
-    <form @submit.prevent="handleSubmit" class="space-y-5">
-      <!-- Service type -->
-      <div>
-        <label class="block text-sm text-slate-400 mb-1.5">Tipo de servicio *</label>
-        <select v-model="form.service_type" class="input w-full">
-          <option value="" disabled>Selecciona un servicio</option>
-          <option v-for="opt in serviceOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
-        </select>
+    <!-- Form state -->
+    <template v-else>
+      <div class="flex items-center justify-between mb-5">
+        <div>
+          <h3 class="text-lg font-semibold text-white">Nueva consulta</h3>
+          <p class="text-sm text-slate-400">para {{ animal.name }}</p>
+        </div>
+        <button type="button" @click="handleClose" class="text-slate-400 hover:text-white transition-colors text-xl">✕</button>
       </div>
 
-      <!-- Description -->
-      <div>
-        <label class="block text-sm text-slate-400 mb-1.5">Descripción del caso *</label>
-        <textarea
-          v-model="form.description"
-          rows="3"
-          placeholder="Cuéntanos qué necesita tu mascota..."
-          class="input w-full resize-none"
-        />
-        <p class="text-xs text-slate-600 mt-1">Mínimo 10 caracteres</p>
-      </div>
-
-      <!-- Priority -->
-      <div>
-        <label class="block text-sm text-slate-400 mb-1.5">Urgencia</label>
-        <div class="flex gap-3">
-          <label v-for="p in [{value:'low',label:'Baja'},{value:'normal',label:'Normal'},{value:'high',label:'Alta'},{value:'urgent',label:'Urgente'}]" :key="p.value"
-            :class="['flex items-center gap-2 cursor-pointer px-3 py-2 rounded-lg border text-sm transition-all cursor-pointer',
-              form.priority === p.value ? 'border-brand-500 bg-brand-500/10 text-brand-400' : 'border-slate-700 text-slate-400 hover:border-slate-600']">
-            <input type="radio" v-model="form.priority" :value="p.value" class="hidden" />
-            {{ p.label }}
-          </label>
+      <!-- Pet profile summary (read-only) -->
+      <div class="flex items-center gap-3 p-3 rounded-lg bg-slate-800/60 border border-slate-700/50 mb-5">
+        <div class="w-10 h-10 rounded-full bg-brand-600/20 flex items-center justify-center text-xl flex-shrink-0">
+          {{ { perro: '🐕', gato: '🐈', ave: '🐦', gallina: '🐔', caballo: '🐴', bovino: '🐄', otro: '🐾' }[animal.species] || '🐾' }}
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-medium text-white">{{ animal.name }}</p>
+          <p class="text-xs text-slate-400 capitalize">
+            {{ animal.species }}{{ animal.breed ? ` · ${animal.breed}` : '' }}
+            <span v-if="animal.sex"> · {{ animal.sex }}</span>
+          </p>
+        </div>
+        <div class="text-right hidden sm:block">
+          <p class="text-xs text-slate-500">{{ client.name }}</p>
+          <p class="text-xs text-slate-600">{{ client.phone }}</p>
         </div>
       </div>
 
-      <!-- Slot calendar -->
-      <div>
-        <label class="block text-sm text-slate-400 mb-3">Horario preferido *</label>
-        <SlotCalendar v-model="selectedSlot" />
-      </div>
+      <!-- Form -->
+      <form @submit.prevent="handleSubmit" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-slate-300 mb-1.5">¿Qué necesitas?</label>
+          <select v-model="form.service_type" class="input w-full">
+            <option value="" disabled>Selecciona un servicio</option>
+            <option v-for="opt in serviceOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+          </select>
+        </div>
 
-      <!-- Error -->
-      <p v-if="error" class="text-red-400 text-sm text-center">{{ error }}</p>
+        <div>
+          <textarea
+            v-model="form.description"
+            rows="3"
+            placeholder="Cuéntanos qué necesita tu mascota..."
+            class="input w-full resize-none"
+          />
+        </div>
 
-      <!-- Submit -->
-      <button type="submit" class="btn-primary w-full justify-center" :disabled="loading || !isValid">
-        {{ loading ? 'Enviando...' : '📨 Enviar solicitud' }}
-      </button>
-    </form>
+        <p v-if="error" class="text-red-400 text-sm text-center">{{ error }}</p>
+
+        <button type="submit" class="btn-primary w-full justify-center" :disabled="loading || !form.service_type || !form.description.trim()">
+          {{ loading ? 'Enviando...' : '✅ Confirmar solicitud' }}
+        </button>
+      </form>
+    </template>
   </BaseModal>
 </template>

@@ -295,7 +295,7 @@ CREATE TABLE leads (
                       CHECK (priority IN ('low','normal','high','urgent')),
   confidence_score  INTEGER DEFAULT 50 CHECK (confidence_score BETWEEN 0 AND 100),
   source            TEXT DEFAULT 'web_form'
-                      CHECK (source IN ('web_form','telegram','whatsapp','phone','referral')),
+                      CHECK (source IN ('web_form','telegram','whatsapp','phone','referral','mi_mascota_portal')),
   inventory_checked BOOLEAN DEFAULT FALSE,             -- Si se validaron insumos
   inventory_ok      BOOLEAN,                           -- Resultado de la validación
   telegram_message_id BIGINT,                          -- ID del mensaje en Telegram

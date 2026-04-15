@@ -34,19 +34,19 @@ const router = createRouter({
     { path: '/confirmacion', component: ConfirmacionView, meta: { layout: 'public' } },
     { path: '/login',        component: LoginView,        meta: { layout: 'none' } },
 
-    // App (protected)
+    // App (protected — admin y tecnico)
     { path: '/app',          redirect: '/app/dashboard' },
-    { path: '/app/dashboard',          component: DashboardView,      meta: { requiresAuth: true } },
-    { path: '/app/leads',              component: LeadsView,          meta: { requiresAuth: true } },
-    { path: '/app/leads/:id',          component: LeadDetailView,     meta: { requiresAuth: true } },
-    { path: '/app/agenda',             component: AgendaView,         meta: { requiresAuth: true } },
-    { path: '/app/visitas/:id',        component: VisitaDetailView,   meta: { requiresAuth: true } },
-    { path: '/app/pacientes',          component: PacientesView,      meta: { requiresAuth: true } },
-    { path: '/app/pacientes/:id',      component: PacienteDetailView, meta: { requiresAuth: true } },
-    { path: '/app/inventario',         component: InventarioView,     meta: { requiresAuth: true } },
-    { path: '/app/procedimientos',     component: ProcedimientosView, meta: { requiresAuth: true } },
-    { path: '/app/reportes',           component: ReportesView,       meta: { requiresAuth: true } },
-    { path: '/app/configuracion',      component: ConfiguracionView,  meta: { requiresAuth: true } },
+    { path: '/app/dashboard',          component: DashboardView,      meta: { requiresAuth: true, roles: ['admin', 'tecnico'] } },
+    { path: '/app/leads',              component: LeadsView,          meta: { requiresAuth: true, roles: ['admin', 'tecnico'] } },
+    { path: '/app/leads/:id',          component: LeadDetailView,     meta: { requiresAuth: true, roles: ['admin', 'tecnico'] } },
+    { path: '/app/agenda',             component: AgendaView,         meta: { requiresAuth: true, roles: ['admin', 'tecnico'] } },
+    { path: '/app/visitas/:id',        component: VisitaDetailView,   meta: { requiresAuth: true, roles: ['admin', 'tecnico'] } },
+    { path: '/app/pacientes',          component: PacientesView,      meta: { requiresAuth: true, roles: ['admin', 'tecnico'] } },
+    { path: '/app/pacientes/:id',      component: PacienteDetailView, meta: { requiresAuth: true, roles: ['admin', 'tecnico'] } },
+    { path: '/app/inventario',         component: InventarioView,     meta: { requiresAuth: true, roles: ['admin', 'tecnico'] } },
+    { path: '/app/procedimientos',     component: ProcedimientosView, meta: { requiresAuth: true, roles: ['admin', 'tecnico'] } },
+    { path: '/app/reportes',           component: ReportesView,       meta: { requiresAuth: true, roles: ['admin', 'tecnico'] } },
+    { path: '/app/configuracion',      component: ConfiguracionView,  meta: { requiresAuth: true, roles: ['admin', 'tecnico'] } },
 
     // 404
     { path: '/:pathMatch(.*)*', redirect: '/' },
@@ -60,6 +60,14 @@ router.beforeEach(async (to) => {
 
   if (to.meta.requiresAuth && !authStore.isLoggedIn) return '/login'
   if (to.path === '/login' && authStore.isLoggedIn)  return '/app/dashboard'
+
+  // Restricción por rol
+  if (to.meta.roles && to.meta.roles.length > 0) {
+    const userRole = authStore.profile?.role
+    if (!to.meta.roles.includes(userRole)) {
+      return '/app/dashboard'
+    }
+  }
 })
 
 export default router

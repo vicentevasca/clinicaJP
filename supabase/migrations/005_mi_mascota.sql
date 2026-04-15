@@ -50,7 +50,7 @@ BEGIN
   rut_num := substring(rut_clean, 1, length(rut_clean) - 1);
   dv := lower(substring(rut_clean, length(rut_clean), 1));
   IF NOT (dv ~ '^[0-9k]$') THEN RETURN FALSE; END IF;
-  FOR i IN REVERSE characters(rut_num)..1 LOOP
+  FOR i IN REVERSE generate_series(length(rut_num), 1, -1) LOOP
     sum_val := sum_val + (substring(rut_num, i, 1)::INTEGER * mul);
     mul := mul + 1;
     IF mul > 7 THEN mul := 2; END IF;

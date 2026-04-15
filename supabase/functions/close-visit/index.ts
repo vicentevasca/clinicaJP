@@ -33,7 +33,15 @@ serve(async (req) => {
       .from('visits').select('*, leads(*)').eq('id', visit_id).single()
     if (visitError || !visit) return new Response(JSON.stringify({ error: 'Visita no encontrada' }), { status: 404, headers: corsHeaders })
 
-    // 2. Create clinical record
+    // 2. Verify lead is in_progress before closing (rule #4: waiting → done forbidden)
+    if (visit.leads?.status === 'waiting') {
+      return new Response(JSON.stringify({ error: 'El lead debe estar en curso antes de cerrar. Marcar primero como En Curso.' }), { status: 400, headers: corsHeaders })
+    }
+    if (visit.leads?.status === 'done' || visit.leads?.status === 'cancelled') {
+      return new Response(JSON.stringify({ error: 'Este lead ya fue cerrado o cancelado.' }), { status: 400, headers: corsHeaders })
+    }
+
+    // 3. Create clinical record
     const { data: clinicalRecord, error: clinicalError } = await supabase
       .from('clinical_records').insert({
         visit_id,

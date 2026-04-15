@@ -1,6 +1,7 @@
 <script setup>
 import { ref, watch } from 'vue'
 import { leadsService } from '@/services/leads.service'
+import { supabase } from '@/services/supabase'
 import { useToast } from '@/composables/useToast'
 import BaseModal from '@/components/ui/BaseModal.vue'
 import BaseSelect from '@/components/ui/BaseSelect.vue'
@@ -53,23 +54,38 @@ watch(() => props.show, (v) => {
 async function save() {
   saving.value = true
   try {
-    const payload = {
-      client_id:  props.lead?.client_id,
-      animal_id:  props.lead?.animal_id,
-      service_type: form.value.service_type,
-      description:  form.value.description,
-      priority:     form.value.priority,
-    }
     if (!props.lead) {
-      // Crear cliente + animal + lead via edge function would be ideal
-      // But for manual creation, we use the service directly
-      await leadsService.create(payload)
+      // Crear lead via Edge Function (crea cliente + animal + lead)
+      const { data: { session } } = await supabase.auth.getSession()
+      const { data, error } = await supabase.functions.invoke('create-lead', {
+        body: {
+          client_name:    form.value.client_name,
+          client_phone:   form.value.client_phone,
+          client_email:   form.value.client_email,
+          region:         form.value.region,
+          comuna:         form.value.comuna,
+          address:        form.value.address,
+          animal_name:    form.value.animal_name,
+          animal_species: form.value.animal_species,
+          animal_breed:   form.value.animal_breed,
+          animal_sex:     form.value.animal_sex,
+          service_type:   form.value.service_type,
+          description:    form.value.description,
+          priority:       form.value.priority,
+        },
+        headers: { Authorization: `Bearer ${session?.access_token}` },
+      })
+      if (error) throw new Error(error.message || 'Error al crear lead')
+      addToast('Lead guardado', 'success')
     } else {
-      // Update existing lead
-      const { supabase } = await import('@/services/supabase')
-      await supabase.from('leads').update(payload).eq('id', props.lead.id)
+      // Actualizar lead existente via servicio
+      await leadsService.update(props.lead.id, {
+        service_type: form.value.service_type,
+        description:  form.value.description,
+        priority:     form.value.priority,
+      })
+      addToast('Lead actualizado', 'success')
     }
-    addToast('Lead guardado', 'success')
     emit('saved')
     emit('close')
   } catch (e) {

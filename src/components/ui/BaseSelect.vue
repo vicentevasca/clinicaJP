@@ -25,6 +25,6 @@ defineEmits(['update:modelValue'])
         {{ opt.label }}
       </option>
     </select>
-    <p v-if="error" class="mt-1 text-xs text-red-400">{{ error }}</p>
+    <p v-if="error" class="mt-1 text-xs" style="color: var(--text-error);">{{ error }}</p>
   </div>
 </template>

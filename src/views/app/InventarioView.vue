@@ -1,5 +1,6 @@
 <script setup>
 import { onMounted, ref, computed } from 'vue'
+import { useRoute } from 'vue-router'
 import { gsap } from 'gsap'
 import { storeToRefs } from 'pinia'
 import { useInventoryStore } from '@/stores/inventory'
@@ -7,6 +8,7 @@ import InsumoCard from '@/components/inventory/InsumoCard.vue'
 import InsumoFormModal from '@/components/inventory/InsumoFormModal.vue'
 import StockAlertBanner from '@/components/inventory/StockAlertBanner.vue'
 
+const route = useRoute()
 const store = useInventoryStore()
 const { items, loading, lowStockItems } = storeToRefs(store)
 
@@ -19,17 +21,24 @@ const CATEGORIES = ['Todos', 'vacuna', 'farmaco', 'insumo', 'herramienta']
 
 const filtered = computed(() => {
   return items.value.filter(item => {
-    const matchTab  = !activeTab.value || item.category === activeTab.value
+    const matchTab  = !activeTab.value || activeTab.value === 'critical' || item.category === activeTab.value
+    const matchCritical = activeTab.value !== 'critical' || item.stock <= item.min_stock
     const matchSearch = !search.value ||
       item.name?.toLowerCase().includes(search.value.toLowerCase()) ||
       item.supplier_name?.toLowerCase().includes(search.value.toLowerCase())
-    return matchTab && matchSearch
+    return matchTab && matchCritical && matchSearch
   })
 })
+
+const criticalItems = computed(() => items.value.filter(i => i.stock <= i.min_stock))
 
 onMounted(async () => {
   await store.fetchAll()
   gsap.from('.stagger-item', { opacity: 0, y: 20, stagger: 0.05, duration: 0.4, delay: 0.1 })
+  // Soportar ?filter=critical desde StockAlertBanner
+  if (route.query.filter === 'critical') {
+    activeTab.value = 'critical'
+  }
 })
 
 function openEdit(item) {

@@ -29,6 +29,14 @@ export const visitsService = {
     return data
   },
 
+  async getByLeadId(leadId) {
+    const { data, error } = await supabase
+      .from('visits').select('*, client:clients(name,phone), animal:animals(name)')
+      .eq('lead_id', leadId).maybeSingle()
+    if (error) throw error
+    return data
+  },
+
   async create(payload) {
     const { data, error } = await supabase
       .from('visits').insert(payload).select().single()

@@ -1,15 +1,35 @@
 <script setup>
-defineProps({
+import { watch, ref } from 'vue'
+
+const props = defineProps({
   title: { type: String, default: '' },
   size:  { type: String, default: 'md' }, // sm | md | lg | xl
+  show:  { type: Boolean, default: false },
 })
 const emit = defineEmits(['close'])
+
+const modalRef = ref(null)
+
+watch(() => props.show, (v) => {
+  if (v) {
+    document.body.style.overflow = 'hidden'
+    // Focus para que keydown funcione
+    setTimeout(() => modalRef.value?.focus(), 10)
+  } else {
+    document.body.style.overflow = ''
+  }
+})
+
+function handleKeydown(e) {
+  if (e.key === 'Escape') emit('close')
+}
 </script>
 <template>
   <Teleport to="body">
-    <div v-if="show" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div v-if="show" class="fixed inset-0 z-50 flex items-center justify-center p-4" @keydown="handleKeydown">
       <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="$emit('close')" />
       <div
+        ref="modalRef"
         class="relative card p-6 w-full shadow-2xl"
         :class="{
           'max-w-sm':  size === 'sm',
@@ -17,7 +37,6 @@ const emit = defineEmits(['close'])
           'max-w-lg':  size === 'lg',
           'max-w-2xl': size === 'xl',
         }"
-        @keydown.escape="$emit('close')"
         tabindex="-1"
       >
         <div v-if="title" class="flex items-center justify-between mb-5">

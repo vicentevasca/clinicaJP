@@ -1,0 +1,17 @@
+{
+  "name": "VetDesk — Clínica JP",
+  "short_name": "VetDesk",
+  "description": "Sistema operativo para clínica veterinaria móvil",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#22c55e",
+  "icons": [
+    {
+      "src": "/icons.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

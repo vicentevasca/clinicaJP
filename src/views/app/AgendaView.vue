@@ -14,6 +14,7 @@ const { visits, loading } = storeToRefs(store)
 const currentDate = ref(new Date())
 const showVisitForm = ref(false)
 const selectedVisit = ref(null)
+const navigating = ref(false)
 
 function getRange(date) {
   const d = new Date(date)
@@ -22,26 +23,29 @@ function getRange(date) {
   return { from: start.toISOString(), to: end.toISOString() }
 }
 
+async function navigateMonth(delta) {
+  if (navigating.value) return
+  navigating.value = true
+  currentDate.value = new Date(currentDate.value.getFullYear(), currentDate.value.getMonth() + delta, 1)
+  const { from, to } = getRange(currentDate.value)
+  await store.fetchByRange(from, to)
+  navigating.value = false
+}
+
 onMounted(async () => {
   const { from, to } = getRange(currentDate.value)
   await store.fetchByRange(from, to)
   gsap.from('.animate-in', { opacity: 0, y: 10, stagger: 0.07, duration: 0.3 })
 })
 
-function prevMonth() {
-  currentDate.value = new Date(currentDate.value.getFullYear(), currentDate.value.getMonth() - 1, 1)
-  const { from, to } = getRange(currentDate.value)
-  store.fetchByRange(from, to)
-}
-function nextMonth() {
-  currentDate.value = new Date(currentDate.value.getFullYear(), currentDate.value.getMonth() + 1, 1)
-  const { from, to } = getRange(currentDate.value)
-  store.fetchByRange(from, to)
-}
+function prevMonth() { navigateMonth(-1) }
+function nextMonth() { navigateMonth(1) }
 function goToday() {
+  if (navigating.value) return
+  navigating.value = true
   currentDate.value = new Date()
   const { from, to } = getRange(currentDate.value)
-  store.fetchByRange(from, to)
+  store.fetchByRange(from, to).then(() => { navigating.value = false })
 }
 
 function openVisit(visit) {

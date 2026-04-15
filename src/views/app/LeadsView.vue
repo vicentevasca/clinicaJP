@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { gsap } from 'gsap'
 import { storeToRefs } from 'pinia'
 import { useLeadsStore } from '@/stores/leads'
@@ -8,6 +8,7 @@ import LeadsColumn from '@/components/leads/LeadsColumn.vue'
 import LeadFormModal from '@/components/leads/LeadFormModal.vue'
 import { LEAD_STATUS, LEAD_STATUS_LABELS, SERVICE_TYPES, PRIORITY_LEVELS } from '@/utils/constants'
 
+const route = useRoute()
 const router = useRouter()
 const store  = useLeadsStore()
 const { items: leads, loading, byStatus } = storeToRefs(store)
@@ -38,6 +39,13 @@ const columns = [
 ]
 
 onMounted(async () => {
+  // Soportar ?filter=waiting|in_progress|done|cancelled desde QuickActions
+  if (route.query.filter) {
+    filterService.value = route.query.filter
+  }
+  if (route.query.service) {
+    filterService.value = route.query.service
+  }
   await store.fetchAll()
   gsap.from('.stagger-item', { opacity: 0, y: 20, stagger: 0.05, duration: 0.4, delay: 0.1 })
 })

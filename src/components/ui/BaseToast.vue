@@ -1,8 +1,18 @@
 <script setup>
-import { useNotificationsStore } from '@/stores/notifications'
+import { onMounted, ref } from 'vue'
 import { storeToRefs } from 'pinia'
-const { toasts } = storeToRefs(useNotificationsStore())
-const { dismiss } = useNotificationsStore()
+
+const store = ref(null)
+const toasts = ref([])
+const dismiss = ref(null)
+
+onMounted(async () => {
+  const { useNotificationsStore } = await import('@/stores/notifications')
+  store.value = useNotificationsStore()
+  toasts.value = storeToRefs(store.value).toasts
+  dismiss.value = store.value.dismiss
+})
+
 const icons = { success: '✓', error: '✕', warning: '⚠', info: 'ℹ' }
 const colors = {
   success: 'bg-brand-600 border-brand-500',

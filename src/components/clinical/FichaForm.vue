@@ -1,5 +1,7 @@
 <script setup>
 import { ref, watch } from 'vue'
+import { useAuthStore } from '@/stores/auth'
+import { clinicalService } from '@/services/clinical.service'
 import { useToast } from '@/composables/useToast'
 
 const props = defineProps({
@@ -8,6 +10,7 @@ const props = defineProps({
 })
 const emit = defineEmits(['saved'])
 
+const authStore = useAuthStore()
 const { addToast } = useToast()
 
 const form = ref({
@@ -38,7 +41,6 @@ watch(() => props.existing, (v) => {
 async function save() {
   saving.value = true
   try {
-    const { supabase } = await import('@/services/supabase')
     const payload = {
       visit_id:        props.visitId,
       animal_id:       props.existing?.animal_id,
@@ -47,14 +49,15 @@ async function save() {
       prescriptions:   form.value.prescriptions,
       observations:    form.value.observations,
       next_visit_rec:  form.value.next_visit_rec,
+      created_by:      authStore.profile?.id || null,
     }
     if (form.value.weight_kg)     payload.weight_kg     = parseFloat(form.value.weight_kg)
     if (form.value.temperature_c)  payload.temperature_c = parseFloat(form.value.temperature_c)
 
     if (props.existing?.id) {
-      await supabase.from('clinical_records').update(payload).eq('id', props.existing.id)
+      await clinicalService.update(props.existing.id, payload)
     } else {
-      await supabase.from('clinical_records').insert(payload)
+      await clinicalService.create(payload)
     }
     addToast('Ficha guardada', 'success')
     emit('saved')

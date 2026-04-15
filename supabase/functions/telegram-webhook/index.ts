@@ -98,10 +98,19 @@ serve(async (req) => {
     // Handle callback_query (inline button press)
     if (update.callback_query) {
       const { id: callbackQueryId, data, message } = update.callback_query
-      const chatId = String(update.callback_query.from.id)
+      const telegramUserId = update.callback_query.from.id
+      const chatId = String(telegramUserId)
       const messageId = message?.message_id
       const [action, ...rest] = (data || '').split(':')
       const leadId = rest.join(':')
+
+      // Verify the Telegram user is authorized (has telegram_id in users table)
+      const { data: authorizedUser } = await supabase
+        .from('users').select('id').eq('telegram_id', telegramUserId).single()
+      if (!authorizedUser) {
+        await answerCallback(botToken, callbackQueryId, '❌ No estás autorizado para usar este bot.')
+        return new Response('Unauthorized', { status: 401 })
+      }
 
       const panelUrl = Deno.env.get('VITE_PANEL_URL') || 'https://vetdesk.vercel.app/app'
 

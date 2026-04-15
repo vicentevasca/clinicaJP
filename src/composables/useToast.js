@@ -7,5 +7,6 @@ export function useToast() {
     error:   store.error,
     warning: store.warning,
     show:    store.show,
+    addToast: (msg, type = 'success') => store.show(msg, type), // alias para compatibilidad
   }
 }

@@ -25,4 +25,31 @@ export const proceduresService = {
       .from('procedures').update({ active: false }).eq('id', id)
     if (error) throw error
   },
+
+  async getLinkedInventory(procedureId) {
+    const { data, error } = await supabase
+      .from('procedure_inventory').select(`
+        quantity, notes,
+        inventory:inventory(id, name, stock, min_stock, unit)
+      `).eq('procedure_id', procedureId)
+    if (error) throw error
+    return data
+  },
+
+  async saveLinkedInventory(procedureId, items) {
+    // items: Array<{ inventory_id, quantity, notes }>
+    // Eliminar vínculos existentes
+    await supabase.from('procedure_inventory').delete().eq('procedure_id', procedureId)
+    // Insertar nuevos
+    if (items.length > 0) {
+      const rows = items.map(i => ({
+        procedure_id: procedureId,
+        inventory_id: i.inventory_id,
+        quantity: i.quantity || 1,
+        notes: i.notes || null,
+      }))
+      const { error } = await supabase.from('procedure_inventory').insert(rows)
+      if (error) throw error
+    }
+  },
 }

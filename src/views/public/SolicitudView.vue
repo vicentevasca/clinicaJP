@@ -1,16 +1,19 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import BaseInput  from '@/components/ui/BaseInput.vue'
 import BaseSelect from '@/components/ui/BaseSelect.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import { ANIMAL_SPECIES, SERVICE_TYPES } from '@/utils/constants'
 import { normalizePhone, isValidChilePhone } from '@/utils/validators'
 import { useRouter } from 'vue-router'
+import { gsap } from 'gsap'
 
 const router  = useRouter()
 const step    = ref(1)
 const loading = ref(false)
 const TOTAL_STEPS = 4
+
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
 const form = ref({
   client_name: '', client_phone: '', client_email: '',
@@ -19,6 +22,11 @@ const form = ref({
   service_type: '', description: '', priority: 'normal',
 })
 const errors = ref({})
+
+onMounted(() => {
+  if (prefersReducedMotion) return
+  gsap.from('.animate-in', { opacity: 0, y: 20, stagger: 0.12, duration: 0.5, delay: 0.1 })
+})
 
 function validate() {
   errors.value = {}
@@ -74,22 +82,22 @@ async function submit() {
 }
 </script>
 <template>
-  <div class="min-h-screen flex items-center justify-center px-4 py-12">
+  <div class="min-h-screen bg-[var(--bg-primary)] flex items-center justify-center px-4 py-12">
     <div class="w-full max-w-lg">
       <div class="text-center mb-8">
-        <h1 class="text-3xl font-bold text-white">🐾 Solicitar visita</h1>
+        <h1 class="text-3xl font-semibold text-[var(--text-primary)]">Solicitar visita</h1>
         <div class="flex justify-center gap-2 mt-4">
           <div v-for="i in TOTAL_STEPS" :key="i"
             class="h-1.5 rounded-full transition-all duration-300"
-            :class="[i <= step ? 'bg-brand-500 w-8' : 'bg-slate-700 w-4']" />
+            :class="[i <= step ? 'bg-[var(--step-active-bg)] w-8' : 'bg-[var(--step-inactive-bg)] w-4']" />
         </div>
-        <p class="text-slate-500 text-sm mt-2">Paso {{ step }} de {{ TOTAL_STEPS }}</p>
+        <p class="text-[var(--text-muted)] text-sm mt-2">Paso {{ step }} de {{ TOTAL_STEPS }}</p>
       </div>
 
       <div class="card p-6 space-y-4">
         <!-- Paso 1 -->
         <template v-if="step === 1">
-          <h2 class="text-lg font-semibold text-white mb-2">Sobre ti</h2>
+          <h2 class="text-lg font-semibold text-[var(--text-primary)] mb-2">Sobre ti</h2>
           <BaseInput v-model="form.client_name"  label="Nombre completo" required :error="errors.client_name" />
           <BaseInput v-model="form.client_phone" label="Teléfono" placeholder="+569..." required :error="errors.client_phone" />
           <BaseInput v-model="form.client_email" label="Email" type="email" />
@@ -100,7 +108,7 @@ async function submit() {
 
         <!-- Paso 2 -->
         <template v-else-if="step === 2">
-          <h2 class="text-lg font-semibold text-white mb-2">Tu mascota</h2>
+          <h2 class="text-lg font-semibold text-[var(--text-primary)] mb-2">Tu mascota</h2>
           <BaseInput  v-model="form.animal_name"    label="Nombre del animal" required :error="errors.animal_name" />
           <BaseSelect v-model="form.animal_species" label="Especie" required :options="ANIMAL_SPECIES" :error="errors.animal_species" />
           <BaseInput  v-model="form.animal_breed"   label="Raza (opcional)" />
@@ -110,13 +118,13 @@ async function submit() {
 
         <!-- Paso 3 -->
         <template v-else-if="step === 3">
-          <h2 class="text-lg font-semibold text-white mb-2">¿Qué necesitas?</h2>
+          <h2 class="text-lg font-semibold text-[var(--text-primary)] mb-2">¿Qué necesitas?</h2>
           <BaseSelect v-model="form.service_type" label="Tipo de servicio" required :options="SERVICE_TYPES" :error="errors.service_type" />
           <div>
-            <label class="label-base">Descripción del caso <span class="text-red-400">*</span></label>
+            <label class="label-base">Descripción del caso <span style="color: var(--text-error)">*</span></label>
             <textarea v-model="form.description" rows="4" class="input-base resize-none"
               placeholder="Describe el caso con al menos 20 caracteres..." />
-            <p v-if="errors.description" class="mt-1 text-xs text-red-400">{{ errors.description }}</p>
+            <p v-if="errors.description" class="mt-1 text-xs" style="color: var(--text-error)">{{ errors.description }}</p>
           </div>
           <BaseSelect v-model="form.priority" label="Urgencia"
             :options="[{value:'normal',label:'Normal'},{value:'urgent',label:'Urgente'}]" />
@@ -124,26 +132,26 @@ async function submit() {
 
         <!-- Paso 4 -->
         <template v-else>
-          <h2 class="text-lg font-semibold text-white mb-2">Confirmar solicitud</h2>
+          <h2 class="text-lg font-semibold text-[var(--text-primary)] mb-2">Confirmar solicitud</h2>
           <div class="space-y-3 text-sm">
-            <div class="bg-slate-700/40 rounded-lg p-3 space-y-1">
-              <p class="text-slate-400 text-xs uppercase tracking-wider mb-2">Datos personales</p>
-              <p><span class="text-slate-400">Nombre:</span> <span class="text-white">{{ form.client_name }}</span></p>
-              <p><span class="text-slate-400">Teléfono:</span> <span class="text-white">{{ form.client_phone }}</span></p>
-              <p><span class="text-slate-400">Dirección:</span> <span class="text-white">{{ form.comuna }}, {{ form.region }}</span></p>
+            <div class="bg-[var(--brand-alpha)] rounded-lg p-3 space-y-1">
+              <p class="text-[var(--text-muted)] text-xs uppercase tracking-wider mb-2">Datos personales</p>
+              <p><span class="text-[var(--text-secondary)]">Nombre:</span> <span class="text-[var(--text-primary)]">{{ form.client_name }}</span></p>
+              <p><span class="text-[var(--text-secondary)]">Teléfono:</span> <span class="text-[var(--text-primary)]">{{ form.client_phone }}</span></p>
+              <p><span class="text-[var(--text-secondary)]">Dirección:</span> <span class="text-[var(--text-primary)]">{{ form.comuna }}, {{ form.region }}</span></p>
             </div>
-            <div class="bg-slate-700/40 rounded-lg p-3 space-y-1">
-              <p class="text-slate-400 text-xs uppercase tracking-wider mb-2">Mascota</p>
-              <p><span class="text-slate-400">Nombre:</span> <span class="text-white">{{ form.animal_name }}</span></p>
-              <p><span class="text-slate-400">Especie:</span> <span class="text-white capitalize">{{ form.animal_species }}</span></p>
+            <div class="bg-[var(--brand-alpha)] rounded-lg p-3 space-y-1">
+              <p class="text-[var(--text-muted)] text-xs uppercase tracking-wider mb-2">Mascota</p>
+              <p><span class="text-[var(--text-secondary)]">Nombre:</span> <span class="text-[var(--text-primary)]">{{ form.animal_name }}</span></p>
+              <p><span class="text-[var(--text-secondary)]">Especie:</span> <span class="text-[var(--text-primary)] capitalize">{{ form.animal_species }}</span></p>
             </div>
-            <div class="bg-slate-700/40 rounded-lg p-3 space-y-1">
-              <p class="text-slate-400 text-xs uppercase tracking-wider mb-2">Solicitud</p>
-              <p><span class="text-slate-400">Servicio:</span> <span class="text-white capitalize">{{ form.service_type?.replace('_',' ') }}</span></p>
-              <p><span class="text-slate-400">Descripción:</span> <span class="text-white">{{ form.description }}</span></p>
+            <div class="bg-[var(--brand-alpha)] rounded-lg p-3 space-y-1">
+              <p class="text-[var(--text-muted)] text-xs uppercase tracking-wider mb-2">Solicitud</p>
+              <p><span class="text-[var(--text-secondary)]">Servicio:</span> <span class="text-[var(--text-primary)] capitalize">{{ form.service_type?.replace('_',' ') }}</span></p>
+              <p><span class="text-[var(--text-secondary)]">Descripción:</span> <span class="text-[var(--text-primary)]">{{ form.description }}</span></p>
             </div>
           </div>
-          <p v-if="errors.submit" class="text-red-400 text-sm">{{ errors.submit }}</p>
+          <p v-if="errors.submit" class="text-sm" style="color: var(--text-error)">{{ errors.submit }}</p>
         </template>
 
         <!-- Acciones -->

@@ -3,7 +3,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, X-Api-Secret',
 }
 
 type EmailTemplate = 'lead_confirmation' | 'lead_new_internal' | 'visit_reminder' | 'stock_alert'
@@ -71,6 +71,13 @@ const TEMPLATES: Record<EmailTemplate, (vars: Record<string, string>) => { subje
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
+
+  // Validar X-Api-Secret
+  const apiSecret = Deno.env.get('VETDESK_PORTAL_SECRET')
+  const sentSecret = req.headers.get('X-Api-Secret')
+  if (apiSecret && sentSecret !== apiSecret) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: corsHeaders })
+  }
 
   const resendApiKey = Deno.env.get('RESEND_API_KEY')
   const fromEmail = Deno.env.get('RESEND_FROM_EMAIL') || 'notificaciones@vetdesk.cl'

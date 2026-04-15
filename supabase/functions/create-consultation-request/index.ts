@@ -23,36 +23,32 @@ serve(async (req) => {
     )
 
     const body = await req.json()
-    const { client_id, animal_id, service_type, description, priority, preferred_date, preferred_time_slot } = body
+    const { client_id, animal_id, service_type, description, priority } = body
 
     if (!client_id || !animal_id || !service_type || !description) {
       return new Response(JSON.stringify({ error: 'Campos requeridos: client_id, animal_id, service_type, description' }), { status: 400, headers: corsHeaders })
     }
 
-    if (!preferred_date || !preferred_time_slot) {
-      return new Response(JSON.stringify({ error: 'Se requiere preferred_date y preferred_time_slot' }), { status: 400, headers: corsHeaders })
-    }
-
     // Verify client and animal exist and are linked
     const { data: animal } = await supabase
       .from('animals')
-      .select('*, client:clients(id)')
+      .select('*, client:clients(id, name)')
       .eq('id', animal_id)
       .eq('client_id', client_id)
-      .single()
+      .maybeSingle()
 
     if (!animal) {
       return new Response(JSON.stringify({ error: 'Animal no encontrado o no pertenece al cliente' }), { status: 404, headers: corsHeaders })
     }
 
-    // Get technician user
+    // Get technician user (may be null if none found — don't throw)
     const { data: technician } = await supabase
       .from('users')
-      .select('id, telegram_id')
+      .select('id, telegram_id, name')
       .in('role', ['admin', 'tecnico'])
       .eq('active', true)
       .limit(1)
-      .single()
+      .maybeSingle()
 
     // Create the lead
     const { data: lead, error: leadError } = await supabase.from('leads').insert({
@@ -64,8 +60,8 @@ serve(async (req) => {
       description,
       priority: priority || 'normal',
       source: 'mi_mascota_portal',
-      preferred_date,
-      preferred_time_slot,
+      preferred_date: body.preferred_date || null,
+      preferred_time_slot: body.preferred_time_slot || null,
     }).select('*').single()
 
     if (leadError) throw leadError
@@ -75,30 +71,55 @@ serve(async (req) => {
       entity: 'lead',
       entity_id: lead.id,
       action: 'create',
-      payload: { source: 'mi_mascota_portal', service_type, preferred_date, preferred_time_slot },
+      payload: { source: 'mi_mascota_portal', service_type },
     })
 
-    // Send Telegram notification if we have a technician
-    if (technician?.telegram_id) {
-      const botToken = Deno.env.get('TELEGRAM_BOT_TOKEN')
-      if (botToken) {
-        const text = [
-          `🐾 *Nueva solicitud desde Mi Mascota*`,
-          ``,
-          `👤 *Cliente:* ${animal.client?.name ?? 'N/A'}`,
-          `🐶 *Animal:* ${animal.name} (${animal.species})`,
-          `🩺 *Servicio:* ${service_type}`,
-          `📅 *Fecha preferida:* ${preferred_date} (${preferred_time_slot})`,
-          `📝 *Descripción:* ${description}`,
-          `⏰ *Recibido:* ${new Date().toLocaleString('es-CL', { timeZone: 'America/Santiago' })}`,
-        ].join('\n')
+    // Lead status history entry
+    await supabase.from('lead_status_history').insert({
+      lead_id: lead.id,
+      from_status: null,
+      to_status: 'waiting',
+      changed_by: technician?.id || null,
+      note: 'Creado desde portal Mi Mascota',
+    })
 
-        await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ chat_id: technician.telegram_id, text, parse_mode: 'Markdown' }),
-        }).catch(console.error)
+    // Send Telegram notification (never fails — errors are warnings only)
+    try {
+      if (technician?.telegram_id) {
+        const botToken = Deno.env.get('TELEGRAM_BOT_TOKEN')
+        if (botToken) {
+          const text = [
+            `🐾 *Nueva solicitud — Mi Mascota*`,
+            ``,
+            `👤 *Cliente:* ${animal.client?.name ?? 'N/A'}`,
+            `🐶 *Animal:* ${animal.name} (${animal.species})`,
+            `🩺 *Servicio:* ${service_type}`,
+            `📝 *Descripción:* ${description}`,
+            `⏰ *Recibido:* ${new Date().toLocaleString('es-CL', { timeZone: 'America/Santiago' })}`,
+          ].join('\n')
+
+          const replyMarkup = {
+            inline_keyboard: [
+              [
+                { text: '📋 Ver detalle', callback_data: `lead_info:${lead.id}` },
+                { text: '💬 WhatsApp', callback_data: `lead_whatsapp:${lead.id}` },
+              ],
+              [
+                { text: '🔄 En curso', callback_data: `lead_status_progress:${lead.id}` },
+                { text: '🌐 Abrir panel', callback_data: `lead_open_panel:${lead.id}` },
+              ],
+            ],
+          }
+
+          await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ chat_id: technician.telegram_id, text, parse_mode: 'Markdown', reply_markup: replyMarkup }),
+          })
+        }
       }
+    } catch (telegramError) {
+      console.error('Telegram notification failed:', telegramError)
     }
 
     return new Response(
@@ -107,6 +128,6 @@ serve(async (req) => {
     )
   } catch (error) {
     console.error('create-consultation-request error:', error)
-    return new Response(JSON.stringify({ error: 'Error interno' }), { status: 500, headers: corsHeaders })
+    return new Response(JSON.stringify({ error: 'Error interno: ' + error.message }), { status: 500, headers: corsHeaders })
   }
 })

@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue'
 import { gsap } from 'gsap'
 import { clientsService } from '@/services/clients.service'
 import { useToast } from '@/composables/useToast'
+import PublicNavbar from '@/components/public/PublicNavbar.vue'
 import ClientSearchForm from '@/components/public/ClientSearchForm.vue'
 import ClientDashboard from '@/components/public/ClientDashboard.vue'
 
@@ -14,6 +15,13 @@ const animals = ref([])
 const loading = ref(false)
 const error = ref('')
 const dashboardRef = ref(null)
+
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+onMounted(() => {
+  if (prefersReducedMotion) return
+  gsap.from('.animate-in', { opacity: 0, y: 20, stagger: 0.12, duration: 0.5, delay: 0.1 })
+})
 
 async function handleSearch({ type, value }) {
   loading.value = true
@@ -42,28 +50,15 @@ function handleLogout() {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 pt-16">
-    <!-- Public navbar -->
-    <nav class="fixed top-0 left-0 right-0 z-50 bg-slate-900/80 backdrop-blur-md border-b border-slate-700/50">
-      <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-        <RouterLink to="/" class="flex items-center gap-2">
-          <span class="text-2xl">🐾</span>
-          <span class="text-lg font-bold text-white">VetDesk</span>
-        </RouterLink>
-        <div class="flex items-center gap-4">
-          <RouterLink to="/solicitar" class="btn-primary text-sm">
-            Solicitar visita
-          </RouterLink>
-        </div>
-      </div>
-    </nav>
+  <div class="min-h-screen bg-[var(--bg-primary)] pt-16">
+    <PublicNavbar :showNavLinks="false" />
 
     <!-- Content -->
     <div class="max-w-4xl mx-auto px-6 py-12">
       <!-- Search view -->
       <div v-if="view === 'search'" class="pt-8">
         <ClientSearchForm @search="handleSearch" />
-        <p v-if="error" class="text-red-400 text-sm text-center mt-4">{{ error }}</p>
+        <p v-if="error" class="text-sm text-center mt-4" style="color: var(--text-error)">{{ error }}</p>
       </div>
 
       <!-- Dashboard view -->

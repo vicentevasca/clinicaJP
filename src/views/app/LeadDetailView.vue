@@ -3,6 +3,7 @@ import { onMounted, ref } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
 import { gsap } from 'gsap'
 import { leadsService } from '@/services/leads.service'
+import { visitsService } from '@/services/visits.service'
 import { useLeadsStore } from '@/stores/leads'
 import { useToast } from '@/composables/useToast'
 import LeadStatusBadge from '@/components/leads/LeadStatusBadge.vue'
@@ -29,19 +30,8 @@ onMounted(async () => {
   try {
     const id = route.params.id
     lead.value = await leadsService.getById(id)
-
-    // Historial
-    const { supabase } = await import('@/services/supabase')
-    const { data: h } = await supabase
-      .from('lead_status_history').select('*')
-      .eq('lead_id', id).order('created_at')
-    history.value = h || []
-
-    // Visita asociada
-    const { data: v } = await supabase
-      .from('visits').select('*, client:clients(name,phone), animal:animals(name)')
-      .eq('lead_id', id).maybeSingle()
-    visit.value = v
+    history.value = await leadsService.getHistory(id)
+    visit.value = await visitsService.getByLeadId(id)
   } catch (e) {
     addToast('Error cargando lead: ' + e.message, 'error')
   } finally {
@@ -55,11 +45,7 @@ async function changeStatus(newStatus) {
     await store.updateStatus(lead.value.id, newStatus)
     lead.value.status = newStatus
     addToast('Estado actualizado', 'success')
-    // Refrescar historial
-    const { supabase } = await import('@/services/supabase')
-    const { data: h } = await supabase
-      .from('lead_status_history').select('*').eq('lead_id', lead.value.id).order('created_at')
-    history.value = h || []
+    history.value = await leadsService.getHistory(lead.value.id)
   } catch (e) {
     addToast('Error: ' + e.message, 'error')
   }

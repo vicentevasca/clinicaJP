@@ -2,6 +2,7 @@ import { supabase } from './supabase.js'
 
 const LEAD_SELECT = `
   id, status, service_type, description, priority, source,
+  preferred_date, preferred_time_slot,
   confidence_score, inventory_checked, inventory_ok,
   created_at, updated_at,
   client:clients(id, name, phone, email, region, comuna, address),
@@ -31,16 +32,27 @@ export const leadsService = {
       .from('leads').update({ status: newStatus, updated_at: new Date().toISOString() })
       .eq('id', id).select().single()
     if (error) throw error
-    // Registrar en historial
-    await supabase.from('lead_status_history').insert({
-      lead_id: id, to_status: newStatus, note
-    })
+    // El trigger DB log_lead_status_change (004_triggers.sql) inserta en lead_status_history automáticamente
     return data
   },
 
   async create(payload) {
     const { data, error } = await supabase
       .from('leads').insert(payload).select().single()
+    if (error) throw error
+    return data
+  },
+
+  async update(id, payload) {
+    const { data, error } = await supabase
+      .from('leads').update({ ...payload, updated_at: new Date().toISOString() }).eq('id', id).select().single()
+    if (error) throw error
+    return data
+  },
+
+  async getHistory(leadId) {
+    const { data, error } = await supabase
+      .from('lead_status_history').select('*').eq('lead_id', leadId).order('created_at')
     if (error) throw error
     return data
   },

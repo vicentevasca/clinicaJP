@@ -2,6 +2,7 @@ import { supabase } from '@/services/supabase.js'
 
 const PORTAL_SECRET = import.meta.env.VITE_PORTAL_API_SECRET || 'vetdesk_portal_secret'
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY
 
 export const portalService = {
   async createConsultationRequest(payload) {
@@ -11,6 +12,7 @@ export const portalService = {
       headers: {
         'Content-Type': 'application/json',
         'X-Api-Secret': PORTAL_SECRET,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
       },
       body: JSON.stringify(payload),
     })

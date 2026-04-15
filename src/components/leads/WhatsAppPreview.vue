@@ -15,7 +15,7 @@ const waText = computed(() => {
   const t = WA_TEMPLATES[props.template]
   if (!t) return ''
   return t(
-    props.lead.client?.name || '',
+    props.lead.client?.name || 'Cliente',
     props.lead.animal?.name || 'tu mascota'
   )
 })

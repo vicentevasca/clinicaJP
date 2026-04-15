@@ -1,19 +1,31 @@
 <script setup>
-import { ref } from 'vue'
-import { useRoute, RouterLink } from 'vue-router'
-import { useAuth } from '@/composables/useAuth'
-import { useInventoryStore } from '@/stores/inventory'
-import { useLeadsStore } from '@/stores/leads'
-import { storeToRefs } from 'pinia'
+import { ref, onMounted } from 'vue'
+import { RouterLink } from 'vue-router'
 
-const route         = useRoute()
-const { profile, logout } = useAuth()
-const inventoryStore = useInventoryStore()
-const leadsStore     = useLeadsStore()
-const { hasAlerts }   = storeToRefs(inventoryStore)
-const { totalWaiting } = storeToRefs(leadsStore)
-
+const route = ref(null)
+const profile = ref(null)
+const logout = ref(null)
+const hasAlerts = ref(false)
+const totalWaiting = ref(0)
 const sidebarOpen = ref(false)
+
+onMounted(async () => {
+  const { useRoute } = await import('vue-router')
+  const { useAuthStore } = await import('@/stores/auth')
+  const { useInventoryStore } = await import('@/stores/inventory')
+  const { useLeadsStore } = await import('@/stores/leads')
+  const { storeToRefs } = await import('pinia')
+
+  route.value = useRoute()
+  const authStore = useAuthStore()
+  const inventoryStore = useInventoryStore()
+  const leadsStore = useLeadsStore()
+
+  profile.value = authStore.profile
+  logout.value = authStore.logout
+  hasAlerts.value = storeToRefs(inventoryStore).hasAlerts
+  totalWaiting.value = storeToRefs(leadsStore).totalWaiting
+})
 
 const navItems = [
   { path: '/app/dashboard',      label: 'Dashboard',      icon: '📊' },

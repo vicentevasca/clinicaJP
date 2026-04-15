@@ -2,8 +2,9 @@
 import { ref, onMounted } from 'vue'
 import { useAuth } from '@/composables/useAuth'
 import { useToast } from '@/composables/useToast'
+import { usersService } from '@/services/users.service'
 
-const { profile, refreshProfile } = useAuth()
+const { profile, refreshProfile, logout } = useAuth()
 const { addToast } = useToast()
 
 const form = ref({
@@ -33,18 +34,22 @@ onMounted(() => {
 async function saveProfile() {
   saving.value = true
   try {
-    const { supabase } = await import('@/services/supabase')
-    const { error } = await supabase
-      .from('users')
-      .update({ name: form.value.name, phone: form.value.phone })
-      .eq('id', profile.value.id)
-    if (error) throw error
+    await usersService.updateProfile(profile.value.id, {
+      name:  form.value.name,
+      phone: form.value.phone,
+    })
     await refreshProfile()
     addToast('Perfil actualizado', 'success')
   } catch (e) {
     addToast('Error: ' + e.message, 'error')
   } finally {
     saving.value = false
+  }
+}
+
+function confirmDelete() {
+  if (confirm('¿Estás seguro de que quieres eliminar tu cuenta? Esta acción es irreversible y todos tus datos serán eliminados.')) {
+    addToast('Para eliminar tu cuenta, contacta al administrador del sistema.', 'warning')
   }
 }
 </script>
@@ -102,7 +107,8 @@ async function saveProfile() {
     <div class="card p-5 border-red-500/20">
       <h3 class="text-sm font-semibold text-red-400 mb-3">Zona de peligro</h3>
       <p class="text-xs text-slate-500 mb-3">Eliminar tu cuenta es irreversible. Todos tus datos serán eliminados.</p>
-      <button class="btn-secondary bg-red-500/20 border-red-500/30 text-red-400 hover:bg-red-500/30">
+      <button class="btn-secondary bg-red-500/20 border-red-500/30 text-red-400 hover:bg-red-500/30"
+        @click="confirmDelete">
         Eliminar cuenta
       </button>
     </div>
