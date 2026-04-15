@@ -85,7 +85,7 @@ async function refresh() {
     <ProcedimientoFormModal
       :show="showForm"
       :procedure="editItem"
-      @close="showForm = false"
+      @close="showForm = false; editItem = null"
       @saved="refresh"
     />
   </div>

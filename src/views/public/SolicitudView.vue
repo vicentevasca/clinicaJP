@@ -55,7 +55,14 @@ async function submit() {
     }
     const res = await fetch(
       `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-lead`,
-      { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+        },
+        body: JSON.stringify(payload),
+      }
     )
     if (!res.ok) throw new Error('Error al enviar')
     router.push('/confirmacion')

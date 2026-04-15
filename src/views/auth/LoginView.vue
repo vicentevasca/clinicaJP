@@ -23,7 +23,7 @@ async function handleLogin() {
     router.push('/app/dashboard')
   } catch (e) {
     error.value = 'Credenciales incorrectas.'
-    toast.error('Error al iniciar sesión')
+    toast.addToast('Error al iniciar sesión', 'error')
   } finally {
     loading.value = false
   }

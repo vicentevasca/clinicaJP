@@ -14,41 +14,39 @@ const emit = defineEmits(['close', 'saved'])
 
 const { addToast } = useToast()
 
-const form = ref({
-  client_name:     '',
-  client_phone:    '',
-  client_email:    '',
-  region:          '',
-  comuna:          '',
-  address:         '',
-  animal_name:     '',
-  animal_species:  '',
-  animal_breed:    '',
-  animal_sex:      '',
-  service_type:    '',
-  description:     '',
-  priority:        'normal',
-})
+const RESET_FORM = {
+  client_name: '', client_phone: '', client_email: '',
+  region: '', comuna: '', address: '',
+  animal_name: '', animal_species: '', animal_breed: '', animal_sex: '',
+  service_type: '', description: '', priority: 'normal',
+}
 
+const form = ref({ ...RESET_FORM })
 const saving = ref(false)
 
 watch(() => props.show, (v) => {
-  if (v && props.lead) {
-    form.value = {
-      client_name:    props.lead.client?.name || '',
-      client_phone:   props.lead.client?.phone || '',
-      client_email:   props.lead.client?.email || '',
-      region:         props.lead.client?.region || '',
-      comuna:         props.lead.client?.comuna || '',
-      address:        props.lead.client?.address || '',
-      animal_name:    props.lead.animal?.name || '',
-      animal_species: props.lead.animal?.species || '',
-      animal_breed:   props.lead.animal?.breed || '',
-      animal_sex:     props.lead.animal?.sex || '',
-      service_type:   props.lead.service_type || '',
-      description:    props.lead.description || '',
-      priority:       props.lead.priority || 'normal',
+  if (v) {
+    if (props.lead) {
+      form.value = {
+        client_name:    props.lead.client?.name || '',
+        client_phone:   props.lead.client?.phone || '',
+        client_email:   props.lead.client?.email || '',
+        region:         props.lead.client?.region || '',
+        comuna:         props.lead.client?.comuna || '',
+        address:        props.lead.client?.address || '',
+        animal_name:    props.lead.animal?.name || '',
+        animal_species: props.lead.animal?.species || '',
+        animal_breed:   props.lead.animal?.breed || '',
+        animal_sex:     props.lead.animal?.sex || '',
+        service_type:   props.lead.service_type || '',
+        description:    props.lead.description || '',
+        priority:       props.lead.priority || 'normal',
+      }
+    } else {
+      form.value = { ...RESET_FORM }
     }
+  } else {
+    form.value = { ...RESET_FORM }
   }
 })
 

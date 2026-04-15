@@ -13,6 +13,13 @@ const form = ref({
 })
 const saving = ref(false)
 
+// Notificaciones — estado local (se conecta a backend cuando esté disponible)
+const notifications = ref({
+  email: true,
+  telegram: true,
+  reminders: true,
+})
+
 onMounted(() => {
   if (profile.value) {
     form.value = {
@@ -72,21 +79,21 @@ async function saveProfile() {
       </form>
     </div>
 
-    <!-- Notificaciones (solo UI) -->
+    <!-- Notificaciones -->
     <div class="card p-5">
       <h3 class="text-sm font-semibold text-slate-300 mb-4">Notificaciones</h3>
       <div class="space-y-3">
         <label class="flex items-center justify-between cursor-pointer">
           <span class="text-sm text-slate-300">Notificaciones por email</span>
-          <input type="checkbox" checked class="accent-brand-500 w-4 h-4" />
+          <input v-model="notifications.email" type="checkbox" class="accent-brand-500 w-4 h-4" />
         </label>
         <label class="flex items-center justify-between cursor-pointer">
           <span class="text-sm text-slate-300">Alertas de Telegram</span>
-          <input type="checkbox" checked class="accent-brand-500 w-4 h-4" />
+          <input v-model="notifications.telegram" type="checkbox" class="accent-brand-500 w-4 h-4" />
         </label>
         <label class="flex items-center justify-between cursor-pointer">
           <span class="text-sm text-slate-300">Recordatorios de visitas</span>
-          <input type="checkbox" checked class="accent-brand-500 w-4 h-4" />
+          <input v-model="notifications.reminders" type="checkbox" class="accent-brand-500 w-4 h-4" />
         </label>
       </div>
     </div>

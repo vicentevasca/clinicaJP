@@ -1,7 +1,6 @@
 <script setup>
 import { ref, watch } from 'vue'
 import { proceduresService } from '@/services/procedures.service'
-import { inventoryService } from '@/services/inventory.service'
 import { useToast } from '@/composables/useToast'
 import BaseModal from '@/components/ui/BaseModal.vue'
 
@@ -15,17 +14,14 @@ const { addToast } = useToast()
 
 const CATEGORIES = ['vacunacion','desparasitacion','chequeo','receta','corte_pelo','atencion_domicilio','otro']
 
-const form = ref({
-  name:         '',
-  description:  '',
-  category:     'atencion_domicilio',
-  duration_min: 30,
-  base_price:   0,
-})
-const saving    = ref(false)
-const inventoryItems = ref([])
+const RESET_FORM = {
+  name: '', description: '', category: 'atencion_domicilio', duration_min: 30, base_price: 0,
+}
 
-watch(() => props.show, async (v) => {
+const form = ref({ ...RESET_FORM })
+const saving    = ref(false)
+
+watch(() => props.show, (v) => {
   if (v) {
     if (props.procedure) {
       form.value = {
@@ -36,10 +32,10 @@ watch(() => props.show, async (v) => {
         base_price:   props.procedure.base_price || 0,
       }
     } else {
-      form.value = { name:'', description:'', category:'atencion_domicilio', duration_min:30, base_price:0 }
+      form.value = { ...RESET_FORM }
     }
-    const items = await inventoryService.getAll()
-    inventoryItems.value = items
+  } else {
+    form.value = { ...RESET_FORM }
   }
 })
 

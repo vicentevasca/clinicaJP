@@ -1,6 +1,6 @@
 <script setup>
-import { onMounted, ref, computed } from 'vue'
-import { useRouter, RouterLink } from 'vue-router'
+import { onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { gsap } from 'gsap'
 import { storeToRefs } from 'pinia'
 import { useLeadsStore } from '@/stores/leads'
@@ -18,24 +18,23 @@ const filterSearch   = ref('')
 const filterService   = ref('')
 const filterPriority  = ref('')
 
-const filteredByStatus = (status) => {
-  return byStatus.value[status].filter(l => {
-    const s = filterSearch.value.toLowerCase()
-    const matchSearch = !s ||
-      l.client?.name?.toLowerCase().includes(s) ||
-      l.animal?.name?.toLowerCase().includes(s) ||
-      l.service_type?.toLowerCase().includes(s)
-    const matchService = !filterService.value || l.service_type === filterService.value
-    const matchPriority = !filterPriority.value || l.priority === filterPriority.value
-    return matchSearch && matchService && matchPriority
-  })
-}
+// Computed que retorna una función para filtrar por columna
+const filteredByStatus = (status) => byStatus.value[status].filter(l => {
+  const s = filterSearch.value.toLowerCase()
+  const matchSearch = !s ||
+    l.client?.name?.toLowerCase().includes(s) ||
+    l.animal?.name?.toLowerCase().includes(s) ||
+    l.service_type?.toLowerCase().includes(s)
+  const matchService = !filterService.value || l.service_type === filterService.value
+  const matchPriority = !filterPriority.value || l.priority === filterPriority.value
+  return matchSearch && matchService && matchPriority
+})
 
 const columns = [
-  { status: LEAD_STATUS.WAITING,     title: 'En espera',    accent: 'border-amber-500', color: 'bg-amber-500' },
-  { status: LEAD_STATUS.IN_PROGRESS, title: 'En curso',    accent: 'border-blue-500',  color: 'bg-blue-500'  },
-  { status: LEAD_STATUS.DONE,        title: 'Cerrados',     accent: 'border-brand-500', color: 'bg-brand-500' },
-  { status: LEAD_STATUS.CANCELLED,   title: 'Cancelados',  accent: 'border-slate-500', color: 'bg-slate-500' },
+  { status: LEAD_STATUS.WAITING,     title: 'En espera',   accent: 'border-amber-500', color: 'bg-amber-500' },
+  { status: LEAD_STATUS.IN_PROGRESS, title: 'En curso',   accent: 'border-blue-500',  color: 'bg-blue-500'  },
+  { status: LEAD_STATUS.DONE,        title: 'Cerrados',    accent: 'border-brand-500', color: 'bg-brand-500' },
+  { status: LEAD_STATUS.CANCELLED,  title: 'Cancelados',  accent: 'border-slate-500', color: 'bg-slate-500' },
 ]
 
 onMounted(async () => {
@@ -45,6 +44,10 @@ onMounted(async () => {
 
 function openLead(lead) {
   router.push(`/app/leads/${lead.id}`)
+}
+
+function closeForm() {
+  showForm.value = false
 }
 </script>
 
@@ -92,7 +95,7 @@ function openLead(lead) {
     <LeadFormModal
       :show="showForm"
       :lead="editLead"
-      @close="showForm = false"
+      @close="closeForm"
       @saved="store.fetchAll()"
     />
   </div>

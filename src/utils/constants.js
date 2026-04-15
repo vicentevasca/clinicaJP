@@ -29,6 +29,22 @@ export const VISIT_STATUS = {
   CANCELLED:   'cancelled',
 }
 
+export const VISIT_STATUS_LABELS = {
+  scheduled:   'Programada',
+  confirmed:   'Confirmada',
+  in_progress: 'En curso',
+  completed:   'Completada',
+  cancelled:  'Cancelada',
+}
+
+export const VISIT_STATUS_COLORS = {
+  scheduled:   'bg-blue-500/20 text-blue-400 border-blue-500/30',
+  confirmed:   'bg-teal-500/20 text-teal-400 border-teal-500/30',
+  in_progress: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
+  completed:   'bg-brand-500/20 text-brand-400 border-brand-500/30',
+  cancelled:   'bg-slate-500/20 text-slate-400 border-slate-500/30',
+}
+
 // Animal species
 export const ANIMAL_SPECIES = [
   { value: 'perro',   label: 'Perro' },

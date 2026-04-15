@@ -14,37 +14,34 @@ const { addToast } = useToast()
 
 const CATEGORIES = ['vacuna', 'farmaco', 'insumo', 'herramienta']
 
-const form = ref({
-  name:         '',
-  description:  '',
-  category:     'insumo',
-  stock:        0,
-  min_stock:   0,
-  unit:        'unidad',
-  cost_per_unit: 0,
-  supplier_name: '',
-  supplier_phone: '',
-})
+const RESET_FORM = {
+  name: '', description: '', category: 'insumo',
+  stock: 0, min_stock: 0, unit: 'unidad', cost_per_unit: 0,
+  supplier_name: '', supplier_phone: '',
+}
 
+const form = ref({ ...RESET_FORM })
 const saving = ref(false)
 
 watch(() => props.show, (v) => {
   if (v) {
     if (props.item) {
       form.value = {
-        name:         props.item.name || '',
-        description:  props.item.description || '',
-        category:     props.item.category || 'insumo',
-        stock:        props.item.stock || 0,
-        min_stock:   props.item.min_stock || 0,
-        unit:         props.item.unit || 'unidad',
-        cost_per_unit: props.item.cost_per_unit || 0,
-        supplier_name: props.item.supplier_name || '',
-        supplier_phone: props.item.supplier_phone || '',
+        name:           props.item.name || '',
+        description:    props.item.description || '',
+        category:       props.item.category || 'insumo',
+        stock:          props.item.stock || 0,
+        min_stock:      props.item.min_stock || 0,
+        unit:           props.item.unit || 'unidad',
+        cost_per_unit:  props.item.cost_per_unit || 0,
+        supplier_name:  props.item.supplier_name || '',
+        supplier_phone:  props.item.supplier_phone || '',
       }
     } else {
-      form.value = { name:'', description:'', category:'insumo', stock:0, min_stock:0, unit:'unidad', cost_per_unit:0, supplier_name:'', supplier_phone:'' }
+      form.value = { ...RESET_FORM }
     }
+  } else {
+    form.value = { ...RESET_FORM }
   }
 })
 

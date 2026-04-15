@@ -1,6 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
+const MiMascotaView = () => import('@/views/public/MiMascotaView.vue')
+
 // Public views
 const LandingView      = () => import('@/views/public/LandingView.vue')
 const SolicitudView    = () => import('@/views/public/SolicitudView.vue')
@@ -20,13 +22,14 @@ const ProcedimientosView = () => import('@/views/app/ProcedimientosView.vue')
 const ReportesView       = () => import('@/views/app/ReportesView.vue')
 const ConfiguracionView  = () => import('@/views/app/ConfiguracionView.vue')
 
-const PUBLIC_PATHS = ['/', '/solicitar', '/confirmacion', '/login']
+const PUBLIC_PATHS = ['/', '/solicitar', '/confirmacion', '/login', '/mi-mascota']
 
 const router = createRouter({
   history: createWebHistory(),
   routes: [
     // Public
     { path: '/',             component: LandingView,      meta: { layout: 'public' } },
+    { path: '/mi-mascota',  component: MiMascotaView,    meta: { layout: 'public' } },
     { path: '/solicitar',    component: SolicitudView,    meta: { layout: 'public' } },
     { path: '/confirmacion', component: ConfirmacionView, meta: { layout: 'public' } },
     { path: '/login',        component: LoginView,        meta: { layout: 'none' } },

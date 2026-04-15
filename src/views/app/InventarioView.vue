@@ -82,7 +82,7 @@ function openEdit(item) {
     <InsumoFormModal
       :show="showForm"
       :item="editItem"
-      @close="showForm = false"
+      @close="showForm = false; editItem = null"
       @saved="store.fetchAll()"
     />
   </div>

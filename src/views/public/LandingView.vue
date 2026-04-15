@@ -85,6 +85,9 @@ const benefits = [
         <div class="flex items-center gap-4">
           <a href="#servicios" class="hidden sm:block text-sm text-slate-400 hover:text-white transition-colors">Servicios</a>
           <a href="#como-funciona" class="hidden sm:block text-sm text-slate-400 hover:text-white transition-colors">Cómo funciona</a>
+          <RouterLink to="/mi-mascota" class="hidden sm:block text-sm text-brand-400 hover:text-brand-300 transition-colors font-medium">
+            Mi Mascota
+          </RouterLink>
           <RouterLink to="/solicitar" class="btn-primary text-sm">
             Solicitar visita
           </RouterLink>
@@ -110,9 +113,9 @@ const benefits = [
           <RouterLink to="/solicitar" class="btn-primary text-base px-8 py-3">
             Solicitar atención →
           </RouterLink>
-          <a href="#como-funciona" class="btn-secondary text-base px-8 py-3">
-            Cómo funciona
-          </a>
+          <RouterLink to="/mi-mascota" class="btn-secondary text-base px-8 py-3">
+            Mi Mascota
+          </RouterLink>
         </div>
         <div class="mt-12 flex items-center justify-center gap-8 text-sm text-slate-500 hero-animate">
           <div class="flex items-center gap-2">
@@ -184,6 +187,80 @@ const benefits = [
             <div>
               <h3 class="font-semibold text-white mb-1">{{ b.title }}</h3>
               <p class="text-xs text-slate-400 leading-relaxed">{{ b.desc }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA Mi Mascota -->
+    <section id="mi-mascota" class="py-20 px-6 bg-slate-800/30">
+      <div class="max-w-5xl mx-auto">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div class="section-animate">
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-400 text-sm font-medium mb-4">
+              🐾 Nuevo portal para clientes
+            </div>
+            <h2 class="text-3xl sm:text-4xl font-bold text-white mb-4">
+              Consulta el historial<br />
+              <span class="text-brand-400">de tu mascota</span> desde la web
+            </h2>
+            <p class="text-slate-400 mb-6 leading-relaxed">
+              ¿Ya tienes mascota registrada con nosotros? Accede al portal <strong class="text-white">Mi Mascota</strong> para ver el expediente clínico completo de tu compañero: diagnósticos, tratamientos, vacunas aplicadas y el historial de visitas a domicilio.
+            </p>
+            <ul class="space-y-3 mb-8">
+              <li class="flex items-center gap-3 text-sm text-slate-300">
+                <span class="text-brand-400">✓</span>
+                Historial clínico completo y actualizado
+              </li>
+              <li class="flex items-center gap-3 text-sm text-slate-300">
+                <span class="text-brand-400">✓</span>
+                Acceso por RUT o teléfono (sin contraseña)
+              </li>
+              <li class="flex items-center gap-3 text-sm text-slate-300">
+                <span class="text-brand-400">✓</span>
+                Solicita nuevas consultas con disponibilidad real
+              </li>
+              <li class="flex items-center gap-3 text-sm text-slate-300">
+                <span class="text-brand-400">✓</span>
+                Vista móvil optimizada
+              </li>
+            </ul>
+            <RouterLink to="/mi-mascota" class="btn-primary text-base px-8 py-3">
+              Entrar a Mi Mascota →
+            </RouterLink>
+          </div>
+
+          <!-- Mockup visual -->
+          <div class="section-animate">
+            <div class="card p-6 bg-slate-800/60 border border-slate-700/50">
+              <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-full bg-brand-600/20 flex items-center justify-center text-lg">🐕</div>
+                <div>
+                  <p class="text-white font-semibold text-sm">Luna</p>
+                  <p class="text-slate-500 text-xs">Golden Retriever · Hembra</p>
+                </div>
+              </div>
+              <div class="space-y-3">
+                <div class="bg-slate-700/40 rounded-lg p-3 border border-slate-600/30">
+                  <p class="text-xs text-slate-500 mb-1">Última consulta</p>
+                  <p class="text-sm text-white">Chequeo general</p>
+                  <p class="text-xs text-slate-400 mt-0.5">12 Abr 2026 · Santiago</p>
+                </div>
+                <div class="bg-slate-700/40 rounded-lg p-3 border border-slate-600/30">
+                  <p class="text-xs text-slate-500 mb-1">Diagnóstico</p>
+                  <p class="text-sm text-white">Chequeo cardiológico normal, peso saludable</p>
+                </div>
+                <div class="bg-slate-700/40 rounded-lg p-3 border border-slate-600/30">
+                  <p class="text-xs text-slate-500 mb-1">Tratamiento</p>
+                  <p class="text-sm text-white">Suplemento vitamínico semanal</p>
+                </div>
+              </div>
+              <div class="mt-4 pt-4 border-t border-slate-700">
+                <RouterLink to="/mi-mascota" class="btn-primary w-full text-sm justify-center text-center">
+                  📋 Ver historial completo
+                </RouterLink>
+              </div>
             </div>
           </div>
         </div>
