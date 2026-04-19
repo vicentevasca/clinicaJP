@@ -39,13 +39,12 @@ const columns = [
 ]
 
 onMounted(async () => {
-  // Soportar ?filter=waiting|in_progress|done|cancelled desde QuickActions
-  if (route.query.filter) {
-    filterService.value = route.query.filter
-  }
+  // ?service=vacunacion filtra por tipo de servicio
   if (route.query.service) {
     filterService.value = route.query.service
   }
+  // ?filter=waiting|in_progress|done|cancelled no filtra el kanban
+  // (el kanban ya agrupa por status en columnas — no hay filtro de status global)
   await store.fetchAll()
   gsap.from('.stagger-item', { opacity: 0, y: 20, stagger: 0.05, duration: 0.4, delay: 0.1 })
 })

@@ -1,5 +1,8 @@
 <script setup>
 import { watch, ref } from 'vue'
+import { useTheme } from '@/composables/useTheme'
+
+const { isDark } = useTheme()
 
 const props = defineProps({
   title: { type: String, default: '' },
@@ -26,7 +29,9 @@ function handleKeydown(e) {
 </script>
 <template>
   <Teleport to="body">
-    <div v-if="show" class="fixed inset-0 z-50 flex items-center justify-center p-4" @keydown="handleKeydown">
+    <div v-if="show" class="fixed inset-0 z-50 flex items-center justify-center p-4"
+      :class="isDark ? 'theme-soft-dark' : ''"
+      @keydown="handleKeydown">
       <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="$emit('close')" />
       <div
         ref="modalRef"
@@ -40,8 +45,8 @@ function handleKeydown(e) {
         tabindex="-1"
       >
         <div v-if="title" class="flex items-center justify-between mb-5">
-          <h2 class="text-lg font-semibold text-white">{{ title }}</h2>
-          <button @click="$emit('close')" class="btn-ghost !p-1.5 text-slate-400">✕</button>
+          <h2 class="text-lg font-semibold" style="color: var(--text-primary);">{{ title }}</h2>
+          <button @click="$emit('close')" class="btn-ghost !p-1.5" style="color: var(--text-muted);">✕</button>
         </div>
         <slot />
       </div>

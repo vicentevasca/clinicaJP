@@ -18,14 +18,12 @@ const labels = {
     type="button"
     @click="slot.available && emit('select', slot)"
     :disabled="!slot.available"
-    :class="[
-      'flex flex-col items-center justify-center px-3 py-2 rounded-lg text-xs font-medium transition-all',
-      slot.available
-        ? selected
-          ? 'bg-brand-500 text-white ring-2 ring-brand-400'
-          : 'bg-slate-700 text-slate-200 hover:bg-brand-600 hover:text-white'
-        : 'bg-slate-800 text-slate-600 line-through cursor-not-allowed opacity-50',
-    ]"
+    class="flex flex-col items-center justify-center px-3 py-2 rounded-lg text-xs font-medium transition-all"
+    :style="slot.available
+      ? selected
+        ? 'background-color: var(--btn-primary-bg); color: white; outline: 2px solid var(--btn-primary-bg); outline-offset: 1px;'
+        : 'background-color: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color);'
+      : 'background-color: var(--bg-secondary); color: var(--text-muted); opacity: 0.5; cursor: not-allowed; text-decoration: line-through;'"
   >
     <span class="text-lg mb-0.5">
       {{ { maniana: '🌅', tarde: '☀️', noche: '🌙' }[slot.time_slot] }}

@@ -1,6 +1,6 @@
 <script setup>
 import { RouterLink } from 'vue-router'
-import { VISIT_STATUS } from '@/utils/constants'
+import { VISIT_STATUS_LABELS } from '@/utils/constants'
 
 defineProps({
   visit: { type: Object, default: null }
@@ -18,7 +18,7 @@ const statusColor = {
   <div v-if="visit" class="card p-4">
     <div class="flex items-center justify-between mb-2">
       <h4 class="text-sm font-semibold text-slate-300">Visita programada</h4>
-      <span class="badge" :class="statusColor[visit.status]">{{ visit.status }}</span>
+      <span class="badge" :class="statusColor[visit.status]">{{ VISIT_STATUS_LABELS[visit.status] || visit.status }}</span>
     </div>
     <p class="text-sm text-slate-400">
       📅 {{ new Date(visit.scheduled_at).toLocaleString('es-CL') }}

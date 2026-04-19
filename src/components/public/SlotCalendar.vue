@@ -40,7 +40,8 @@ onMounted(loadSlots)
   <div>
     <!-- Loading skeleton -->
     <div v-if="loading" class="grid grid-cols-7 gap-2">
-      <div v-for="i in 7" :key="i" class="bg-slate-800 rounded-lg h-24 animate-pulse" />
+      <div v-for="i in 7" :key="i" class="rounded-lg h-24 animate-pulse"
+        style="background-color: var(--bg-secondary);" />
     </div>
 
     <!-- Error -->
@@ -53,12 +54,13 @@ onMounted(loadSlots)
       <div
         v-for="day in slots"
         :key="day.date"
-        class="flex items-center gap-3 py-2 border-b border-slate-700/50 last:border-0"
+        class="flex items-center gap-3 py-2 last:border-0"
+        style="border-bottom: 1px solid var(--border-color);"
       >
         <!-- Day header -->
         <div class="w-16 flex-shrink-0">
-          <div class="text-xs text-slate-500 uppercase tracking-wide">{{ day.day_name.slice(0, 3) }}</div>
-          <div class="text-lg font-bold text-white">{{ new Date(day.date + 'T12:00:00').getDate() }}</div>
+          <div class="text-xs uppercase tracking-wide" style="color: var(--text-muted);">{{ day.day_name.slice(0, 3) }}</div>
+          <div class="text-lg font-bold" style="color: var(--text-primary);">{{ new Date(day.date + 'T12:00:00').getDate() }}</div>
         </div>
 
         <!-- Slots -->
@@ -78,7 +80,8 @@ onMounted(loadSlots)
     <button
       type="button"
       @click="loadSlots"
-      class="mt-3 text-xs text-slate-500 hover:text-slate-300 transition-colors"
+      class="mt-3 text-xs transition-opacity hover:opacity-60"
+      style="color: var(--text-muted);"
     >
       🔄 Actualizar disponibilidad
     </button>

@@ -6,14 +6,15 @@ const props = defineProps({
 })
 defineEmits(['click'])
 
+// Show stock relative to 3× min_stock as "full" so critical stock appears near 33%
 const stockPercent = computed(() => {
-  if (!props.item.min_stock) return 100
-  return Math.min(100, Math.round((props.item.stock / props.item.min_stock) * 100))
+  const max = (props.item.min_stock || 1) * 3
+  return Math.min(100, Math.round((props.item.stock / max) * 100))
 })
 
 const stockColor = computed(() => {
   if (props.item.stock <= props.item.min_stock) return 'bg-red-500'
-  if (stockPercent.value < 150) return 'bg-amber-500'
+  if (props.item.stock < props.item.min_stock * 2) return 'bg-amber-500'
   return 'bg-brand-500'
 })
 </script>
@@ -33,7 +34,8 @@ const stockColor = computed(() => {
       <div class="flex justify-between text-xs mb-0.5">
         <span class="text-slate-500">Stock</span>
         <span :class="item.stock <= item.min_stock ? 'text-red-400' : 'text-slate-400'">
-          {{ item.stock }} / {{ item.min_stock }}
+          {{ item.stock }} {{ item.unit }}
+          <span class="text-slate-600">(mín {{ item.min_stock }})</span>
         </span>
       </div>
       <div class="h-1.5 bg-slate-700 rounded-full overflow-hidden">

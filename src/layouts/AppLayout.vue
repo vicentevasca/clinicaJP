@@ -1,31 +1,22 @@
 <script setup>
-import { ref, onMounted } from 'vue'
-import { RouterLink } from 'vue-router'
+import { ref } from 'vue'
+import { RouterLink, useRoute } from 'vue-router'
+import { storeToRefs } from 'pinia'
+import { useAuthStore } from '@/stores/auth'
+import { useInventoryStore } from '@/stores/inventory'
+import { useLeadsStore } from '@/stores/leads'
 
-const route = ref(null)
-const profile = ref(null)
-const logout = ref(null)
-const hasAlerts = ref(false)
-const totalWaiting = ref(0)
+const route = useRoute()
+const authStore = useAuthStore()
+const inventoryStore = useInventoryStore()
+const leadsStore = useLeadsStore()
+
+const { profile } = storeToRefs(authStore)
+const { hasAlerts } = storeToRefs(inventoryStore)
+const { totalWaiting } = storeToRefs(leadsStore)
+const logout = authStore.logout
+
 const sidebarOpen = ref(false)
-
-onMounted(async () => {
-  const { useRoute } = await import('vue-router')
-  const { useAuthStore } = await import('@/stores/auth')
-  const { useInventoryStore } = await import('@/stores/inventory')
-  const { useLeadsStore } = await import('@/stores/leads')
-  const { storeToRefs } = await import('pinia')
-
-  route.value = useRoute()
-  const authStore = useAuthStore()
-  const inventoryStore = useInventoryStore()
-  const leadsStore = useLeadsStore()
-
-  profile.value = authStore.profile
-  logout.value = authStore.logout
-  hasAlerts.value = storeToRefs(inventoryStore).hasAlerts
-  totalWaiting.value = storeToRefs(leadsStore).totalWaiting
-})
 
 const navItems = [
   { path: '/app/dashboard',      label: 'Dashboard',      icon: '📊' },
@@ -44,12 +35,23 @@ function isActive(path) {
 </script>
 
 <template>
-  <div class="flex h-screen bg-slate-900 overflow-hidden">
+  <div class="theme-soft-dark flex h-screen bg-slate-900 overflow-hidden">
+    <!-- Overlay móvil -->
+    <div
+      v-if="sidebarOpen"
+      class="fixed inset-0 z-20 bg-black/50 lg:hidden"
+      @click="sidebarOpen = false"
+    />
+
     <!-- Sidebar -->
-    <aside class="w-64 flex-shrink-0 bg-slate-800/80 border-r border-slate-700/60 flex flex-col">
+    <aside
+      class="fixed lg:static inset-y-0 left-0 z-30 w-64 flex-shrink-0 bg-slate-800/80 border-r border-slate-700/60 flex flex-col transition-transform duration-200"
+      :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
+    >
       <!-- Logo -->
       <div class="h-16 flex items-center px-6 border-b border-slate-700/60">
         <span class="text-xl font-bold text-white">🐾 VetDesk</span>
+        <button class="ml-auto lg:hidden btn-ghost !p-1 text-slate-400" @click="sidebarOpen = false">✕</button>
       </div>
 
       <!-- Nav -->
@@ -61,6 +63,7 @@ function isActive(path) {
           :class="isActive(item.path)
             ? 'bg-brand-600/20 text-brand-400'
             : 'text-slate-400 hover:text-slate-100 hover:bg-slate-700/60'"
+          @click="sidebarOpen = false"
         >
           <span class="text-base">{{ item.icon }}</span>
           <span>{{ item.label }}</span>
@@ -91,8 +94,15 @@ function isActive(path) {
     </aside>
 
     <!-- Main content -->
-    <main class="flex-1 overflow-y-auto">
-      <RouterView />
-    </main>
+    <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+      <!-- Header móvil con hamburger -->
+      <header class="lg:hidden h-14 flex items-center gap-3 px-4 border-b border-slate-700/60 bg-slate-800/80 flex-shrink-0">
+        <button class="btn-ghost !p-1.5 text-slate-400" @click="sidebarOpen = true">☰</button>
+        <span class="text-base font-bold text-white">🐾 VetDesk</span>
+      </header>
+      <main class="flex-1 overflow-y-auto">
+        <RouterView />
+      </main>
+    </div>
   </div>
 </template>

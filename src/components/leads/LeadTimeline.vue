@@ -1,4 +1,5 @@
 <script setup>
+import { LEAD_STATUS_LABELS } from '@/utils/constants'
 defineProps({
   history: { type: Array, default: () => [] }
 })
@@ -14,7 +15,7 @@ defineProps({
       <div class="w-3 h-3 rounded-full bg-brand-500 flex-shrink-0 mt-1 -ml-5" />
       <div>
         <p class="text-sm text-slate-300">
-          <span class="font-medium">{{ entry.to_status }}</span>
+          <span class="font-medium">{{ LEAD_STATUS_LABELS[entry.to_status] || entry.to_status }}</span>
         </p>
         <p v-if="entry.note" class="text-xs text-slate-500 mt-0.5">{{ entry.note }}</p>
         <p class="text-xs text-slate-600 mt-0.5">

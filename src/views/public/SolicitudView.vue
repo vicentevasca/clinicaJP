@@ -28,6 +28,11 @@ onMounted(() => {
   gsap.from('.animate-in', { opacity: 0, y: 20, stagger: 0.12, duration: 0.5, delay: 0.1 })
 })
 
+function animateStep() {
+  if (prefersReducedMotion) return
+  gsap.from('.card', { opacity: 0, x: 16, duration: 0.25 })
+}
+
 function validate() {
   errors.value = {}
   if (step.value === 1) {
@@ -50,8 +55,8 @@ function validate() {
   return Object.keys(errors.value).length === 0
 }
 
-function next() { if (validate()) step.value++ }
-function prev() { if (step.value > 1) step.value-- }
+function next() { if (validate()) { step.value++; animateStep() } }
+function prev() { if (step.value > 1) { step.value--; animateStep() } }
 
 async function submit() {
   if (!validate()) return
@@ -82,7 +87,7 @@ async function submit() {
 }
 </script>
 <template>
-  <div class="min-h-screen bg-[var(--bg-primary)] flex items-center justify-center px-4 py-12">
+  <div class="min-h-screen bg-[var(--bg-primary)] flex items-center justify-center px-4 pt-20 pb-12">
     <div class="w-full max-w-lg">
       <div class="text-center mb-8">
         <h1 class="text-3xl font-semibold text-[var(--text-primary)]">Solicitar visita</h1>

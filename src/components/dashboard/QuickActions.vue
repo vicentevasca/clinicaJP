@@ -4,7 +4,7 @@ const actions = [
   { to: '/app/leads',        icon: '📋', label: 'Nuevo lead',   color: 'bg-brand-600 hover:bg-brand-500' },
   { to: '/app/agenda',       icon: '📅', label: 'Ver agenda',   color: 'bg-blue-600 hover:bg-blue-500' },
   { to: '/app/inventario',   icon: '📦', label: 'Revisar stock', color: 'bg-amber-600 hover:bg-amber-500' },
-  { to: '/app/leads?filter=waiting', icon: '💬', label: 'Último lead', color: 'bg-slate-600 hover:bg-slate-500' },
+  { to: '/app/leads',               icon: '💬', label: 'Leads en espera', color: 'bg-slate-600 hover:bg-slate-500' },
 ]
 </script>
 <template>

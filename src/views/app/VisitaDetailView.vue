@@ -4,6 +4,7 @@ import { useRoute, RouterLink } from 'vue-router'
 import { gsap } from 'gsap'
 import { visitsService } from '@/services/visits.service'
 import { useToast } from '@/composables/useToast'
+import { VISIT_STATUS_LABELS } from '@/utils/constants'
 import FichaClinica from '@/components/clinical/FichaClinica.vue'
 import FichaForm from '@/components/clinical/FichaForm.vue'
 
@@ -62,7 +63,7 @@ function onFichaSaved() {
             · {{ visit.duration_min }} min
           </p>
         </div>
-        <span class="badge border" :class="statusColor[visit.status]">{{ visit.status }}</span>
+        <span class="badge border" :class="statusColor[visit.status]">{{ VISIT_STATUS_LABELS[visit.status] || visit.status }}</span>
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
@@ -135,6 +136,7 @@ function onFichaSaved() {
           <FichaForm
             v-if="visit.status === 'in_progress' || visit.status === 'completed'"
             :visit-id="visit.id"
+            :animal-id="visit.animal_id"
             :existing="visit.clinical_records?.[0]"
             @saved="onFichaSaved"
           />

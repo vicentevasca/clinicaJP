@@ -7,9 +7,9 @@ const props = defineProps({
   view:        { type: String, default: 'month' }, // month | week | day
 })
 
-defineEmits(['visit-click', 'new-visit'])
+defineEmits(['visit-click', 'new-visit', 'prev', 'next', 'today'])
 
-const DAYS_ES = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb']
+const DAYS_ES = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom']
 const MONTHS_ES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
 
 const statusColor = {
@@ -36,8 +36,9 @@ const calendarDays = computed(() => {
   const firstDay = new Date(year, month, 1)
   const lastDay  = new Date(year, month + 1, 0)
   const days = []
-  // Pad start
-  for (let i = 0; i < firstDay.getDay(); i++) {
+  // Pad start — week starts Monday (getDay: 0=Sun → 6 pads, 1=Mon → 0 pads)
+  const startPad = (firstDay.getDay() + 6) % 7
+  for (let i = 0; i < startPad; i++) {
     days.push(null)
   }
   // Days of month

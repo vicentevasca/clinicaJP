@@ -1,6 +1,6 @@
 <script setup>
 defineProps({
-  record: { type: Object, required: true }
+  record: { type: Object, default: null }
 })
 </script>
 <template>

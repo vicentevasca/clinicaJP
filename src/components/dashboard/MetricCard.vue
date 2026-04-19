@@ -11,9 +11,9 @@ defineProps({
   <div class="card p-5 animate-in">
     <div class="flex items-start justify-between">
       <div>
-        <p class="text-slate-400 text-xs font-medium uppercase tracking-wide mb-1">{{ label }}</p>
-        <p class="text-2xl font-bold text-white">
-          <span v-if="loading" class="text-slate-600">—</span>
+        <p class="text-xs font-medium uppercase tracking-wide mb-1" style="color: var(--text-muted);">{{ label }}</p>
+        <p class="text-2xl font-bold" style="color: var(--text-primary);">
+          <span v-if="loading" style="color: var(--text-muted); opacity: 0.4;">—</span>
           <span v-else>{{ value }}</span>
         </p>
       </div>

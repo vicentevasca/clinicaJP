@@ -1,17 +1,9 @@
 <script setup>
-import { onMounted, ref } from 'vue'
 import { storeToRefs } from 'pinia'
+import { useNotificationsStore } from '@/stores/notifications'
 
-const store = ref(null)
-const toasts = ref([])
-const dismiss = ref(null)
-
-onMounted(async () => {
-  const { useNotificationsStore } = await import('@/stores/notifications')
-  store.value = useNotificationsStore()
-  toasts.value = storeToRefs(store.value).toasts
-  dismiss.value = store.value.dismiss
-})
+const store = useNotificationsStore()
+const { toasts } = storeToRefs(store)
 
 const icons = { success: '✓', error: '✕', warning: '⚠', info: 'ℹ' }
 const colors = {
@@ -30,9 +22,9 @@ const colors = {
           class="flex items-start gap-3 px-4 py-3 rounded-lg border text-sm text-white shadow-xl"
           :class="colors[toast.type] || colors.info"
         >
-          <span class="font-bold">{{ icons[toast.type] || 'ℹ' }}</span>
+          <span class="font-bold flex-shrink-0">{{ icons[toast.type] || 'ℹ' }}</span>
           <span class="flex-1">{{ toast.message }}</span>
-          <button @click="dismiss(toast.id)" class="opacity-60 hover:opacity-100">✕</button>
+          <button @click="store.dismiss(toast.id)" class="opacity-60 hover:opacity-100 flex-shrink-0">✕</button>
         </div>
       </TransitionGroup>
     </div>

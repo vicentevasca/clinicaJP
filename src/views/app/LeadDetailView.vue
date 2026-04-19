@@ -10,7 +10,10 @@ import LeadStatusBadge from '@/components/leads/LeadStatusBadge.vue'
 import LeadTimeline from '@/components/leads/LeadTimeline.vue'
 import WhatsAppPreview from '@/components/leads/WhatsAppPreview.vue'
 import VisitaSummaryCard from '@/components/visits/VisitaSummaryCard.vue'
-import { LEAD_STATUS, LEAD_STATUS_LABELS, PRIORITY_LEVELS, SERVICE_TYPES } from '@/utils/constants'
+import { LEAD_STATUS, LEAD_STATUS_LABELS, PRIORITY_LEVELS, SERVICE_TYPES, VISIT_STATUS_LABELS } from '@/utils/constants'
+
+const serviceLabel = (val) => SERVICE_TYPES.find(s => s.value === val)?.label ?? val
+const priorityLabel = (val) => PRIORITY_LEVELS.find(p => p.value === val)?.label ?? val
 
 const route    = useRoute()
 const router   = useRouter()
@@ -67,13 +70,13 @@ async function changeStatus(newStatus) {
           </span>
           <div>
             <h1 class="text-xl font-bold text-white">{{ lead.client?.name || 'Sin nombre' }}</h1>
-            <p class="text-slate-400 text-sm">{{ lead.animal?.name }} · {{ lead.service_type }}</p>
+            <p class="text-slate-400 text-sm">{{ lead.animal?.name }} · {{ serviceLabel(lead.service_type) }}</p>
           </div>
         </div>
         <div class="flex gap-2 flex-wrap">
           <LeadStatusBadge :status="lead.status" />
           <span class="badge" :class="lead.priority === 'urgent' ? 'bg-red-500/20 text-red-400' : 'bg-slate-500/20 text-slate-400'">
-            {{ lead.priority }}
+            {{ priorityLabel(lead.priority) }}
           </span>
         </div>
       </div>
@@ -105,7 +108,7 @@ async function changeStatus(newStatus) {
               </div>
               <div>
                 <p class="text-slate-500 text-xs">Servicio</p>
-                <p class="text-slate-300">{{ lead.service_type }}</p>
+                <p class="text-slate-300">{{ serviceLabel(lead.service_type) }}</p>
               </div>
               <div>
                 <p class="text-slate-500 text-xs">Recibido</p>

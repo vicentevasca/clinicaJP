@@ -1,9 +1,11 @@
 <script setup>
-import { onMounted, ref, computed } from 'vue'
+import { onMounted, ref, computed, watch } from 'vue'
 import { gsap } from 'gsap'
 import { leadsService } from '@/services/leads.service'
 import { visitsService } from '@/services/visits.service'
-import { LEAD_STATUS_LABELS } from '@/utils/constants'
+import { LEAD_STATUS_LABELS, SERVICE_TYPES } from '@/utils/constants'
+
+const serviceLabel = (val) => SERVICE_TYPES.find(s => s.value === val)?.label ?? val
 
 const leads    = ref([])
 const visits   = ref([])
@@ -11,17 +13,17 @@ const loading  = ref(true)
 const period   = ref('7d')
 
 const now = new Date()
-const periods = {
-  '1d':  new Date(now - 1 * 24 * 60 * 60 * 1000),
-  '7d':  new Date(now - 7 * 24 * 60 * 60 * 1000),
-  '30d': new Date(now - 30 * 24 * 60 * 60 * 1000),
+
+function getPeriodStart(p) {
+  const ms = { '1d': 1, '7d': 7, '30d': 30 }[p] ?? 7
+  return new Date(now - ms * 24 * 60 * 60 * 1000)
 }
 
 const periodLeads = computed(() =>
-  leads.value.filter(l => new Date(l.created_at) >= periods[period.value])
+  leads.value.filter(l => new Date(l.created_at) >= getPeriodStart(period.value))
 )
 const periodVisits = computed(() =>
-  visits.value.filter(v => new Date(v.scheduled_at) >= periods[period.value])
+  visits.value.filter(v => new Date(v.scheduled_at) >= getPeriodStart(period.value))
 )
 const totalLeads = computed(() => periodLeads.value.length)
 const doneLeads  = computed(() => periodLeads.value.filter(l => l.status === 'done').length)
@@ -49,7 +51,7 @@ const maxStatus = computed(() => Math.max(...Object.values(byStatus.value), 1))
 
 onMounted(async () => {
   try {
-    const from = periods[period.value]
+    const from = getPeriodStart(period.value)
     const [leadsData, visitsData] = await Promise.all([
       leadsService.getAll(),
       visitsService.getByRange(from.toISOString(), now.toISOString()),
@@ -62,6 +64,15 @@ onMounted(async () => {
     loading.value = false
   }
   gsap.from('.animate-in', { opacity: 0, y: 10, stagger: 0.07, duration: 0.3 })
+})
+
+watch(period, async (newPeriod) => {
+  try {
+    const from = getPeriodStart(newPeriod)
+    visits.value = await visitsService.getByRange(from.toISOString(), now.toISOString())
+  } catch (e) {
+    console.error(e)
+  }
 })
 </script>
 
@@ -129,7 +140,7 @@ onMounted(async () => {
               class="flex items-center justify-between p-2 rounded-lg bg-slate-800/40">
               <div class="flex items-center gap-3">
                 <span class="text-xs text-slate-600 w-4">#{{ i + 1 }}</span>
-                <span class="text-sm text-slate-300 capitalize">{{ service.replace('_',' ') }}</span>
+                <span class="text-sm text-slate-300">{{ serviceLabel(service) }}</span>
               </div>
               <span class="badge bg-brand-500/20 text-brand-400">{{ count }}</span>
             </div>
@@ -155,14 +166,14 @@ onMounted(async () => {
               class="border-b border-slate-800 hover:bg-slate-800/40">
               <td class="py-2 px-2 text-slate-400">{{ new Date(lead.created_at).toLocaleDateString('es-CL') }}</td>
               <td class="py-2 px-2 text-slate-300">{{ lead.client?.name || '—' }}</td>
-              <td class="py-2 px-2 text-slate-300 capitalize">{{ lead.service_type?.replace('_',' ') }}</td>
+              <td class="py-2 px-2 text-slate-300">{{ serviceLabel(lead.service_type) }}</td>
               <td class="py-2 px-2">
                 <span class="badge text-xs" :class="{
                   'bg-amber-500/20 text-amber-400': lead.status === 'waiting',
                   'bg-blue-500/20 text-blue-400':   lead.status === 'in_progress',
                   'bg-brand-500/20 text-brand-400': lead.status === 'done',
                   'bg-slate-500/20 text-slate-400': lead.status === 'cancelled',
-                }">{{ lead.status }}</span>
+                }">{{ LEAD_STATUS_LABELS[lead.status] || lead.status }}</span>
               </td>
             </tr>
           </tbody>

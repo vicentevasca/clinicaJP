@@ -18,7 +18,7 @@ defineProps({
       <span class="text-slate-500">Dx:</span> {{ record.diagnosis }}
     </p>
     <p v-if="record.treatment" class="text-xs text-slate-400 mb-1">
-      <span class="text-slate-500">Rx:</span> {{ record.treatment }}
+      <span class="text-slate-500">Tto:</span> {{ record.treatment }}
     </p>
     <p v-if="record.prescriptions" class="text-xs text-slate-400">
       <span class="text-slate-500">Rx extra:</span> {{ record.prescriptions }}

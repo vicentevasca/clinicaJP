@@ -36,7 +36,7 @@ const upcomingVisits = computed(() => {
       <span class="text-red-400 text-sm">⚠️</span>
       <div>
         <p class="text-sm font-medium text-red-300">Stock crítico</p>
-        <p class="text-xs text-slate-400">{{ item.name }} — {{ item.stock }} {{ item.unit }} (mín: {{ item.min_stock }})</p>
+        <p class="text-xs" style="color: var(--text-muted);">{{ item.name }} — {{ item.stock }} {{ item.unit }} (mín: {{ item.min_stock }})</p>
       </div>
     </div>
 
@@ -46,7 +46,7 @@ const upcomingVisits = computed(() => {
       <span class="text-amber-400 text-sm">⏰</span>
       <div>
         <p class="text-sm font-medium text-amber-300">Lead sin respuesta</p>
-        <p class="text-xs text-slate-400">{{ lead.client?.name }} — {{ lead.service_type }}</p>
+        <p class="text-xs" style="color: var(--text-muted);">{{ lead.client?.name }} — {{ lead.service_type }}</p>
       </div>
     </div>
 
@@ -56,11 +56,11 @@ const upcomingVisits = computed(() => {
       <span class="text-blue-400 text-sm">📅</span>
       <div>
         <p class="text-sm font-medium text-blue-300">Visita en 24h</p>
-        <p class="text-xs text-slate-400">{{ visit.animal?.name }} — {{ new Date(visit.scheduled_at).toLocaleString('es-CL') }}</p>
+        <p class="text-xs" style="color: var(--text-muted);">{{ visit.animal?.name }} — {{ new Date(visit.scheduled_at).toLocaleString('es-CL') }}</p>
       </div>
     </div>
   </div>
-  <div v-else class="text-center py-4 text-slate-500 text-sm">
+  <div v-else class="text-center py-4 text-sm" style="color: var(--text-muted);">
     Sin alertas activas
   </div>
 </template>

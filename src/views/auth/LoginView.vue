@@ -42,14 +42,14 @@ async function handleLogin() {
         <h1 class="text-3xl font-semibold text-[var(--text-primary)]">VetDesk</h1>
         <p class="text-[var(--text-secondary)] mt-2">Panel de administración</p>
       </div>
-      <div class="card p-6 space-y-4">
+      <form class="card p-6 space-y-4" @submit.prevent="handleLogin">
         <BaseInput v-model="email"    label="Email"      type="email"    required autocomplete="email" />
         <BaseInput v-model="password" label="Contraseña" type="password" required autocomplete="current-password" />
         <p v-if="error" class="text-sm" style="color: var(--text-error)">{{ error }}</p>
-        <BaseButton class="w-full" :loading="loading" @click="handleLogin">
+        <BaseButton type="submit" class="w-full" :loading="loading">
           Ingresar
         </BaseButton>
-      </div>
+      </form>
     </div>
   </div>
 </template>

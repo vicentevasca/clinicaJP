@@ -12,7 +12,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-[var(--bg-primary)] flex items-center justify-center px-4">
+  <div class="min-h-screen pt-16 bg-[var(--bg-primary)] flex items-center justify-center px-4">
     <div class="max-w-md w-full text-center">
       <div class="animate-in mb-8">
         <div

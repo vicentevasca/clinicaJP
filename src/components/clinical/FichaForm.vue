@@ -6,6 +6,7 @@ import { useToast } from '@/composables/useToast'
 
 const props = defineProps({
   visitId:  { type: String, required: true },
+  animalId: { type: String, default: null },
   existing: { type: Object, default: null },
 })
 const emit = defineEmits(['saved'])
@@ -43,7 +44,7 @@ async function save() {
   try {
     const payload = {
       visit_id:        props.visitId,
-      animal_id:       props.existing?.animal_id,
+      animal_id:       props.existing?.animal_id ?? props.animalId,
       diagnosis:       form.value.diagnosis,
       treatment:       form.value.treatment,
       prescriptions:   form.value.prescriptions,

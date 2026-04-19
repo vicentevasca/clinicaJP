@@ -112,7 +112,8 @@ export function useTheme() {
 
   function init() {
     const saved = localStorage.getItem('vetdesk-theme')
-    isDark.value = saved === 'dark'
+    // Default to dark — the app was designed for dark mode
+    isDark.value = saved !== 'light'
     applyTheme(isDark.value)
   }
 

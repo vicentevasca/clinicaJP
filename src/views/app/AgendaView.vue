@@ -6,6 +6,7 @@ import { storeToRefs } from 'pinia'
 import { useAgendaStore } from '@/stores/agenda'
 import CalendarView from '@/components/agenda/CalendarView.vue'
 import VisitaForm from '@/components/agenda/VisitaForm.vue'
+import { VISIT_STATUS_LABELS } from '@/utils/constants'
 
 const router = useRouter()
 const store  = useAgendaStore()
@@ -101,7 +102,7 @@ function openVisit(visit) {
               'bg-amber-500/20 text-amber-400': visit.status === 'in_progress',
               'bg-brand-500/20 text-brand-400':  visit.status === 'completed',
               'bg-slate-500/20 text-slate-400': visit.status === 'cancelled',
-            }">{{ visit.status }}</span>
+            }">{{ VISIT_STATUS_LABELS[visit.status] || visit.status }}</span>
             <span class="text-sm text-slate-600">→</span>
           </div>
         </div>
