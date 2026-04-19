@@ -37,7 +37,10 @@ const lastVisitDate = computed(() => records.value[0]?.created_at ?? null)
 
 const nextRecommendation = computed(() => records.value[0]?.next_visit_rec ?? null)
 
-// Detect vaccine-related records by keywords
+// Vacunas reales de la tabla vaccinations
+const dedicatedVaccinations = computed(() => props.animal.vaccinations || [])
+
+// Fallback: fichas clínicas con mención de vacunas (para registros anteriores a la tabla)
 const VACCINE_KEYWORDS = [
   'vacun', 'antirrábic', 'parvovirus', 'moquillo', 'leptospir',
   'hepatitis', 'bordetella', 'leucemia', 'calicivirus', 'rinotraqueitis',
@@ -49,6 +52,23 @@ const vaccineRecords = computed(() =>
     return VACCINE_KEYWORDS.some(kw => text.includes(kw))
   })
 )
+
+const hasVaccines = computed(() =>
+  dedicatedVaccinations.value.length > 0 || vaccineRecords.value.length > 0
+)
+
+function isOverdue(date) {
+  if (!date) return false
+  return new Date(date) < new Date()
+}
+function isDueSoon(date) {
+  if (!date) return false
+  const diff = new Date(date) - new Date()
+  return diff > 0 && diff < 30 * 24 * 60 * 60 * 1000
+}
+function formatShortDate(d) {
+  return new Date(d + 'T12:00:00').toLocaleDateString('es-CL', { day: '2-digit', month: 'short', year: 'numeric' })
+}
 
 const weightHistory = computed(() =>
   records.value
@@ -323,76 +343,117 @@ const tabs = [
 
     <!-- ── Tab: Vacunas ───────────────────────────────── -->
     <div v-else-if="activeTab === 'vaccines'">
-      <!-- Info banner -->
-      <div
-        class="flex items-start gap-3 p-4 rounded-xl mb-4 text-sm"
-        style="background-color: var(--brand-alpha); border: 1px solid var(--border-color);"
-      >
-        <span class="flex-shrink-0 text-base" aria-hidden="true">ℹ️</span>
-        <p style="color: var(--text-secondary);">
-          Se muestran las consultas que contienen menciones a vacunas o esquemas de inmunización.
-        </p>
-      </div>
 
-      <!-- No vaccines found -->
-      <div v-if="vaccineRecords.length === 0" class="card p-10 text-center">
+      <!-- Empty state -->
+      <div v-if="!hasVaccines" class="card p-10 text-center">
         <span class="text-4xl mb-3 block" aria-hidden="true">💉</span>
         <p class="font-semibold mb-1" style="color: var(--text-primary);">Sin vacunas registradas</p>
         <p class="text-sm mb-5" style="color: var(--text-muted);">
           No encontramos registros de vacunación para {{ animal.name }}
         </p>
-        <button
-          type="button"
-          @click="emit('request-visit', animal)"
-          class="btn-primary text-sm inline-flex"
-        >
+        <button type="button" @click="emit('request-visit', animal)" class="btn-primary text-sm inline-flex">
           Solicitar vacunación
         </button>
       </div>
 
-      <!-- Vaccine list -->
-      <div v-else class="space-y-3">
+      <div v-else class="space-y-4">
+
+        <!-- Alertas de próximas dosis -->
         <div
-          v-for="record in vaccineRecords"
-          :key="record.id"
-          class="card p-4"
+          v-if="dedicatedVaccinations.some(v => isOverdue(v.next_due_date))"
+          class="flex items-start gap-3 p-4 rounded-xl text-sm"
+          style="background-color: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2);"
         >
-          <div class="flex items-start gap-3">
-            <div
-              class="w-9 h-9 rounded-xl flex items-center justify-center text-lg flex-shrink-0 mt-0.5"
-              style="background-color: var(--brand-alpha);"
-              aria-hidden="true"
-            >
-              💉
-            </div>
-            <div class="flex-1 min-w-0">
-              <div class="flex items-center justify-between gap-2 mb-2">
-                <span
-                  class="text-xs font-bold px-2 py-0.5 rounded-full"
-                  style="background-color: var(--brand-alpha); color: var(--btn-primary-bg); border: 1px solid var(--border-color);"
+          <span class="text-lg flex-shrink-0">⚠️</span>
+          <p style="color: var(--text-error);">
+            Hay vacunas con refuerzo vencido. Comunícate con nosotros para reagendar.
+          </p>
+        </div>
+        <div
+          v-else-if="dedicatedVaccinations.some(v => isDueSoon(v.next_due_date))"
+          class="flex items-start gap-3 p-4 rounded-xl text-sm"
+          style="background-color: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2);"
+        >
+          <span class="text-lg flex-shrink-0">📅</span>
+          <p style="color: #d97706;">
+            Hay refuerzos programados en los próximos 30 días.
+          </p>
+        </div>
+
+        <!-- Vacunas de la tabla dedicada -->
+        <template v-if="dedicatedVaccinations.length > 0">
+          <div
+            v-for="vac in dedicatedVaccinations"
+            :key="vac.id"
+            class="card p-4"
+            :style="isOverdue(vac.next_due_date) ? 'border-left: 3px solid #ef4444;'
+              : isDueSoon(vac.next_due_date) ? 'border-left: 3px solid #f59e0b;'
+              : 'border-left: 3px solid var(--btn-primary-bg);'"
+          >
+            <div class="flex items-start gap-3">
+              <div class="w-9 h-9 rounded-xl flex items-center justify-center text-lg flex-shrink-0 mt-0.5"
+                style="background-color: var(--brand-alpha);" aria-hidden="true">
+                💉
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center justify-between gap-2 mb-1">
+                  <p class="text-sm font-bold" style="color: var(--text-primary);">{{ vac.vaccine_name }}</p>
+                  <span class="text-xs flex-shrink-0" style="color: var(--text-muted);">
+                    {{ formatShortDate(vac.administered_at) }}
+                  </span>
+                </div>
+
+                <div class="flex flex-wrap gap-x-4 gap-y-0.5 text-xs mb-2" style="color: var(--text-muted);">
+                  <span v-if="vac.lab_name">🏭 {{ vac.lab_name }}</span>
+                  <span v-if="vac.batch_number">Lote: {{ vac.batch_number }}</span>
+                  <span v-if="vac.dose_number">Dosis {{ vac.dose_number }}</span>
+                </div>
+
+                <div v-if="vac.next_due_date"
+                  class="flex items-center gap-1.5 text-xs font-medium pt-2 mt-1"
+                  style="border-top: 1px solid var(--border-color);"
+                  :style="isOverdue(vac.next_due_date) ? 'color: #ef4444;'
+                    : isDueSoon(vac.next_due_date) ? 'color: #d97706;'
+                    : 'color: var(--btn-primary-bg);'"
                 >
+                  <span>📅</span>
+                  <span>Próximo refuerzo: {{ formatShortDate(vac.next_due_date) }}</span>
+                  <span v-if="isOverdue(vac.next_due_date)" class="font-bold">· VENCIDO</span>
+                </div>
+
+                <p v-if="vac.notes" class="text-xs mt-1 italic" style="color: var(--text-muted);">{{ vac.notes }}</p>
+              </div>
+            </div>
+          </div>
+        </template>
+
+        <!-- Fallback: fichas clínicas con mención de vacunas (registros previos a la tabla) -->
+        <template v-if="vaccineRecords.length > 0 && dedicatedVaccinations.length === 0">
+          <p class="text-xs px-1" style="color: var(--text-muted);">Registros de vacunación de consultas anteriores:</p>
+          <div v-for="record in vaccineRecords" :key="record.id" class="card p-4">
+            <div class="flex items-start gap-3">
+              <div class="w-9 h-9 rounded-xl flex items-center justify-center text-lg flex-shrink-0 mt-0.5"
+                style="background-color: var(--brand-alpha);" aria-hidden="true">💉</div>
+              <div class="flex-1 min-w-0">
+                <span class="text-xs font-bold px-2 py-0.5 rounded-full mb-2 inline-block"
+                  style="background-color: var(--brand-alpha); color: var(--btn-primary-bg); border: 1px solid var(--border-color);">
                   {{ formatDate(record.created_at) }}
                 </span>
-              </div>
-              <div class="space-y-1.5">
-                <div v-if="record.prescriptions">
-                  <p class="text-xs uppercase tracking-wide font-semibold mb-0.5" style="color: var(--text-muted);">Vacuna(s) / Prescripción</p>
-                  <p class="text-sm" style="color: var(--text-primary);">{{ record.prescriptions }}</p>
-                </div>
-                <div v-if="record.treatment">
-                  <p class="text-xs uppercase tracking-wide font-semibold mb-0.5" style="color: var(--text-muted);">Tratamiento</p>
-                  <p class="text-sm" style="color: var(--text-secondary);">{{ record.treatment }}</p>
-                </div>
-                <div v-if="record.next_visit_rec" class="flex items-center gap-1.5 mt-2 pt-2" style="border-top: 1px solid var(--border-color);">
-                  <span class="text-xs" aria-hidden="true">📅</span>
-                  <p class="text-xs font-medium" style="color: var(--btn-primary-bg);">
-                    Refuerzo: {{ record.next_visit_rec }}
-                  </p>
+                <div class="space-y-1.5">
+                  <div v-if="record.prescriptions">
+                    <p class="text-xs uppercase tracking-wide font-semibold mb-0.5" style="color: var(--text-muted);">Vacuna(s)</p>
+                    <p class="text-sm" style="color: var(--text-primary);">{{ record.prescriptions }}</p>
+                  </div>
+                  <div v-if="record.next_visit_rec" class="flex items-center gap-1.5 mt-2 pt-2" style="border-top: 1px solid var(--border-color);">
+                    <span class="text-xs">📅</span>
+                    <p class="text-xs font-medium" style="color: var(--btn-primary-bg);">Refuerzo: {{ record.next_visit_rec }}</p>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        </template>
+
       </div>
     </div>
 

@@ -46,23 +46,29 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: 'Cliente no encontrado' }), { status: 404, headers: corsHeaders })
     }
 
-    // Get animals with clinical records and recent visits
+    // Get animals with clinical records
     const { data: animals } = await supabase
       .from('animals')
       .select('*, clinical_records(id, created_at, weight_kg, temperature_c, diagnosis, treatment, prescriptions, observations, next_visit_rec, visit:visits(id, scheduled_at, status, completed_at, address))')
       .eq('client_id', client.id)
       .order('created_at', { ascending: true })
 
-    // Get recent visits for each animal (for recent_visits field)
+    // Get recent visits and vaccinations for each animal
     const animalsWithVisits = await Promise.all((animals || []).map(async (animal) => {
-      const { data: visits } = await supabase
-        .from('visits')
-        .select('id, scheduled_at, status, address, completed_at, procedures:visit_procedures(executed, procedure:procedures(id, name, category))')
-        .eq('animal_id', animal.id)
-        .order('scheduled_at', { ascending: false })
-        .limit(10)
+      const [{ data: visits }, { data: vaccinations }] = await Promise.all([
+        supabase
+          .from('visits')
+          .select('id, scheduled_at, status, address, completed_at, procedures:visit_procedures(executed, procedure:procedures(id, name, category))')
+          .eq('animal_id', animal.id)
+          .order('scheduled_at', { ascending: false })
+          .limit(10),
+        supabase
+          .from('vaccinations')
+          .select('id, vaccine_name, batch_number, lab_name, dose_number, administered_at, next_due_date, notes')
+          .eq('animal_id', animal.id)
+          .order('administered_at', { ascending: false }),
+      ])
 
-      // Sort clinical records by created_at desc
       const sortedRecords = (animal.clinical_records || []).sort((a, b) =>
         new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       )
@@ -70,7 +76,8 @@ serve(async (req) => {
       return {
         ...animal,
         clinical_records: sortedRecords,
-        recent_visits: visits || [],
+        recent_visits:    visits        || [],
+        vaccinations:     vaccinations  || [],
       }
     }))
 

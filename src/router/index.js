@@ -66,7 +66,7 @@ router.beforeEach(async (to) => {
     const userRole = authStore.profile?.role
     if (!to.meta.roles.includes(userRole)) {
       // Evitar loop: si ya está en login o la ruta no requiere auth, no redirigir
-      return authStore.isLoggedIn ? '/login' : '/login'
+      return authStore.isLoggedIn ? '/app/dashboard' : '/login'
     }
   }
 })

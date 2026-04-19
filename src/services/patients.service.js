@@ -27,4 +27,12 @@ export const patientsService = {
     if (error) throw error
     return data
   },
+
+  async updateWeight(animalId, weightKg) {
+    const { error } = await supabase
+      .from('animals')
+      .update({ weight_kg: weightKg, updated_at: new Date().toISOString() })
+      .eq('id', animalId)
+    if (error) throw error
+  },
 }

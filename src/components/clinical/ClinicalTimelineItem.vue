@@ -10,9 +10,14 @@ defineProps({
       <p class="text-sm font-medium text-slate-300">
         {{ new Date(record.created_at).toLocaleDateString('es-CL') }}
       </p>
-      <span v-if="record.temperature_c" class="text-xs text-slate-500">
-        🌡 {{ record.temperature_c }}°C
-      </span>
+      <div class="flex items-center gap-2">
+        <span v-if="record.weight_kg" class="text-xs text-slate-500">
+          ⚖️ {{ record.weight_kg }} kg
+        </span>
+        <span v-if="record.temperature_c" class="text-xs text-slate-500">
+          🌡 {{ record.temperature_c }}°C
+        </span>
+      </div>
     </div>
     <p v-if="record.diagnosis" class="text-xs text-slate-400 mb-1">
       <span class="text-slate-500">Dx:</span> {{ record.diagnosis }}
@@ -20,8 +25,11 @@ defineProps({
     <p v-if="record.treatment" class="text-xs text-slate-400 mb-1">
       <span class="text-slate-500">Tto:</span> {{ record.treatment }}
     </p>
-    <p v-if="record.prescriptions" class="text-xs text-slate-400">
-      <span class="text-slate-500">Rx extra:</span> {{ record.prescriptions }}
+    <p v-if="record.prescriptions" class="text-xs text-slate-400 mb-1">
+      <span class="text-slate-500">Rx:</span> {{ record.prescriptions }}
+    </p>
+    <p v-if="record.next_visit_rec" class="text-xs text-brand-400/70">
+      Próxima: {{ record.next_visit_rec }}
     </p>
   </div>
 </template>

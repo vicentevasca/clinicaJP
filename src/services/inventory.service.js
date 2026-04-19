@@ -9,14 +9,10 @@ export const inventoryService = {
   },
 
   async getLowStock() {
-    // Note: accurate low-stock requires comparing stock vs min_stock per row
-    // The inventoryStore uses a JS computed filter instead
     const { data, error } = await supabase
-      .from('inventory').select('*')
-      .eq('active', true)
-      .lte('stock', 0)
+      .from('inventory').select('*').eq('active', true)
     if (error) throw error
-    return data
+    return (data || []).filter(item => item.stock <= item.min_stock)
   },
 
   async upsert(payload) {

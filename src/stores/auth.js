@@ -47,5 +47,5 @@ export const useAuthStore = defineStore('auth', () => {
     profile.value = null
   }
 
-  return { user, profile, loading, isAdmin, isTecnico, isLoggedIn, init, login, logout }
+  return { user, profile, loading, isAdmin, isTecnico, isLoggedIn, init, login, logout, loadProfile }
 })

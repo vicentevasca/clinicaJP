@@ -45,3 +45,14 @@ export function isValidRUT(rut) {
 export function normalizeRUT(rut) {
   return rut?.replace(/[^0-9kK]/g, '').toLowerCase()
 }
+
+// Formatea un RUT normalizado o crudo a 12.345.678-9
+export function formatRUT(rut) {
+  if (!rut) return ''
+  const clean = rut.replace(/[^0-9kK]/g, '')
+  if (clean.length < 2) return rut
+  const dv   = clean.slice(-1).toUpperCase()
+  const body = clean.slice(0, -1)
+  const formatted = body.replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+  return `${formatted}-${dv}`
+}

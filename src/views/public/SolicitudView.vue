@@ -4,7 +4,7 @@ import BaseInput  from '@/components/ui/BaseInput.vue'
 import BaseSelect from '@/components/ui/BaseSelect.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import { ANIMAL_SPECIES, SERVICE_TYPES } from '@/utils/constants'
-import { normalizePhone, isValidChilePhone } from '@/utils/validators'
+import { normalizePhone, isValidChilePhone, isValidRUT, normalizeRUT, formatRUT } from '@/utils/validators'
 import { useRouter } from 'vue-router'
 import { gsap } from 'gsap'
 
@@ -16,7 +16,7 @@ const TOTAL_STEPS = 4
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
 const form = ref({
-  client_name: '', client_phone: '', client_email: '',
+  client_name: '', client_rut: '', client_phone: '', client_email: '',
   region: '', comuna: '', address: '',
   animal_name: '', animal_species: '', animal_breed: '', animal_sex: '',
   service_type: '', description: '', priority: 'normal',
@@ -37,6 +37,8 @@ function validate() {
   errors.value = {}
   if (step.value === 1) {
     if (!form.value.client_name)  errors.value.client_name = 'Nombre requerido'
+    if (!form.value.client_rut || !isValidRUT(form.value.client_rut))
+      errors.value.client_rut = 'RUT inválido (ej: 12.345.678-9)'
     if (!form.value.client_phone || !isValidChilePhone(form.value.client_phone))
       errors.value.client_phone = 'Teléfono inválido (+56...)'
     if (!form.value.region)  errors.value.region  = 'Región requerida'
@@ -64,7 +66,8 @@ async function submit() {
   try {
     const payload = {
       ...form.value,
-      client_phone: normalizePhone(form.value.client_phone)
+      client_phone: normalizePhone(form.value.client_phone),
+      client_rut:   normalizeRUT(form.value.client_rut),
     }
     const res = await fetch(
       `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-lead`,
@@ -157,6 +160,7 @@ async function submit() {
           </div>
 
           <BaseInput v-model="form.client_name"  label="Nombre completo" required :error="errors.client_name" />
+          <BaseInput v-model="form.client_rut"   label="RUT" placeholder="12.345.678-9" required :error="errors.client_rut" />
           <BaseInput v-model="form.client_phone" label="Teléfono" placeholder="+569..." required :error="errors.client_phone" />
           <BaseInput v-model="form.client_email" label="Email (opcional)" type="email" />
           <BaseInput v-model="form.region"   label="Región"   required :error="errors.region" />
@@ -244,6 +248,8 @@ async function submit() {
               <div class="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5">
                 <span style="color: var(--text-muted);">Nombre</span>
                 <span class="font-medium" style="color: var(--text-primary);">{{ form.client_name }}</span>
+                <span style="color: var(--text-muted);">RUT</span>
+                <span class="font-medium" style="color: var(--text-primary);">{{ formatRUT(form.client_rut) }}</span>
                 <span style="color: var(--text-muted);">Teléfono</span>
                 <span class="font-medium" style="color: var(--text-primary);">{{ form.client_phone }}</span>
                 <span v-if="form.client_email" style="color: var(--text-muted);">Email</span>

@@ -2,6 +2,7 @@
 import { ref, watch } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { clinicalService } from '@/services/clinical.service'
+import { patientsService } from '@/services/patients.service'
 import { useToast } from '@/composables/useToast'
 
 const props = defineProps({
@@ -60,6 +61,13 @@ async function save() {
     } else {
       await clinicalService.create(payload)
     }
+
+    // Actualizar peso del animal con el registro más reciente
+    const animalId = props.existing?.animal_id ?? props.animalId
+    if (payload.weight_kg && animalId) {
+      await patientsService.updateWeight(animalId, payload.weight_kg)
+    }
+
     addToast('Ficha guardada', 'success')
     emit('saved')
   } catch (e) {

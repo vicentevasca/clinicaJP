@@ -23,6 +23,7 @@
     "@vitejs/plugin-vue": "^6.0.5",
     "autoprefixer": "^10.5.0",
     "postcss": "^8.5.9",
+    "supabase": "^2.92.1",
     "tailwindcss": "^4.2.2",
     "vite": "^8.0.4"
   }

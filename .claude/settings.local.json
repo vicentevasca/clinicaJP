@@ -2,7 +2,11 @@
   "permissions": {
     "allow": [
       "Bash(npx vite:*)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(npm install:*)",
+      "Bash(npx supabase:*)",
+      "Bash(touch \"/mnt/c/Users/Darth/Desktop/pega/Cli/clinicaJP/progress.md\")",
+      "Bash(echo \"\")"
     ]
   }
 }

@@ -54,6 +54,28 @@ function normalizePhone(phone: string): string {
   return digits.length >= 9 ? '+56' + digits : phone
 }
 
+// ─── Normalize RUT: strip everything except digits and k ────────────────────
+function normalizeRUT(rut: string): string {
+  return rut.replace(/[^0-9kK]/g, '').toLowerCase()
+}
+
+// ─── Validate Chilean RUT ────────────────────────────────────────────────────
+function isValidRUT(rut: string): boolean {
+  const cleaned = normalizeRUT(rut)
+  if (!cleaned || cleaned.length < 2) return false
+  const match = cleaned.match(/^(\d+)([0-9k])$/)
+  if (!match) return false
+  const [, body, dv] = match
+  let sum = 0, mul = 2
+  for (let i = body.length - 1; i >= 0; i--) {
+    sum += parseInt(body[i]) * mul++
+    if (mul > 7) mul = 2
+  }
+  const expected = (11 - (sum % 11)).toString()
+  const expectedDV = expected === '11' ? '0' : expected === '10' ? 'k' : expected
+  return expectedDV === dv
+}
+
 // ─── Main Handler ────────────────────────────────────────────────────────────
 serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
@@ -76,14 +98,48 @@ serve(async (req) => {
     }
 
     const phone = normalizePhone(body.client_phone)
+    const rut   = body.client_rut ? normalizeRUT(body.client_rut) : null
 
-    // 2. Buscar o crear cliente
+    // Validar RUT si viene en el payload
+    if (rut && !isValidRUT(rut)) {
+      return new Response(JSON.stringify({ error: 'RUT inválido' }), { status: 400, headers: corsHeaders })
+    }
+
+    // 2. Buscar o crear cliente — primero por teléfono, luego por RUT
     let clientId: string
     let client: Record<string, unknown>
-    const { data: existing } = await supabase.from('clients').select('*').eq('phone', phone).single()
-    if (existing) {
-      clientId = existing.id
-      client = existing
+
+    const { data: existingByPhone } = await supabase
+      .from('clients').select('*').eq('phone', phone).maybeSingle()
+
+    if (existingByPhone) {
+      clientId = existingByPhone.id
+      client   = existingByPhone
+      // Si el cliente no tenía RUT y ahora lo proporciona, actualizarlo
+      if (rut && !existingByPhone.rut) {
+        await supabase.from('clients').update({ rut }).eq('id', clientId)
+        client = { ...client, rut }
+      }
+    } else if (rut) {
+      // Buscar por RUT (cliente que cambió de teléfono)
+      const { data: existingByRut } = await supabase
+        .from('clients').select('*').eq('rut', rut).maybeSingle()
+
+      if (existingByRut) {
+        clientId = existingByRut.id
+        client   = existingByRut
+        // Actualizar teléfono con el nuevo
+        await supabase.from('clients').update({ phone }).eq('id', clientId)
+        client = { ...client, phone }
+      } else {
+        const { data: newClient, error } = await supabase.from('clients').insert({
+          name: body.client_name, phone, email: body.client_email,
+          region: body.region, comuna: body.comuna, address: body.address, rut,
+        }).select('*').single()
+        if (error) throw error
+        clientId = newClient.id
+        client   = newClient
+      }
     } else {
       const { data: newClient, error } = await supabase.from('clients').insert({
         name: body.client_name, phone, email: body.client_email,
@@ -91,7 +147,7 @@ serve(async (req) => {
       }).select('*').single()
       if (error) throw error
       clientId = newClient.id
-      client = newClient
+      client   = newClient
     }
 
     // 3. Crear animal

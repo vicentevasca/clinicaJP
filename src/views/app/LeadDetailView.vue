@@ -11,6 +11,7 @@ import LeadTimeline from '@/components/leads/LeadTimeline.vue'
 import WhatsAppPreview from '@/components/leads/WhatsAppPreview.vue'
 import VisitaSummaryCard from '@/components/visits/VisitaSummaryCard.vue'
 import { LEAD_STATUS, LEAD_STATUS_LABELS, PRIORITY_LEVELS, SERVICE_TYPES, VISIT_STATUS_LABELS } from '@/utils/constants'
+import { formatRUT } from '@/utils/validators'
 
 const serviceLabel = (val) => SERVICE_TYPES.find(s => s.value === val)?.label ?? val
 const priorityLabel = (val) => PRIORITY_LEVELS.find(p => p.value === val)?.label ?? val
@@ -88,6 +89,10 @@ async function changeStatus(newStatus) {
           <div class="card p-4 animate-in">
             <h3 class="text-sm font-semibold text-slate-300 mb-3">Información</h3>
             <div class="grid grid-cols-2 gap-3 text-sm">
+              <div v-if="lead.client?.rut">
+                <p class="text-slate-500 text-xs">RUT</p>
+                <p class="text-slate-300">{{ formatRUT(lead.client.rut) }}</p>
+              </div>
               <div>
                 <p class="text-slate-500 text-xs">Teléfono</p>
                 <a v-if="lead.client?.phone" :href="`tel:${lead.client.phone}`"
