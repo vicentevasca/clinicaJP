@@ -86,34 +86,97 @@ async function submit() {
   }
 }
 </script>
+
 <template>
-  <div class="min-h-screen bg-[var(--bg-primary)] flex items-center justify-center px-4 pt-20 pb-12">
-    <div class="w-full max-w-lg">
-      <div class="text-center mb-8">
-        <h1 class="text-3xl font-semibold text-[var(--text-primary)]">Solicitar visita</h1>
-        <div class="flex justify-center gap-2 mt-4">
-          <div v-for="i in TOTAL_STEPS" :key="i"
-            class="h-1.5 rounded-full transition-all duration-300"
-            :class="[i <= step ? 'bg-[var(--step-active-bg)] w-8' : 'bg-[var(--step-inactive-bg)] w-4']" />
+  <div class="min-h-screen pt-20 pb-12 px-4" style="background-color: var(--bg-primary);">
+    <div class="w-full max-w-lg mx-auto">
+
+      <!-- ── Header ──────────────────────────────────────── -->
+      <div class="text-center mb-8 animate-in">
+        <!-- Logo / paw -->
+        <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-4"
+          style="background-color: var(--brand-alpha); border: 1px solid var(--border-color);">🐾</div>
+
+        <h1 class="text-3xl font-bold tracking-tight mb-1" style="color: var(--text-primary);">
+          Solicitar visita
+        </h1>
+        <p class="text-sm" style="color: var(--text-muted);">
+          Completa el formulario y te contactamos en menos de 2 horas
+        </p>
+
+        <!-- Step pills -->
+        <div class="flex items-center justify-center gap-2 mt-6">
+          <template v-for="i in TOTAL_STEPS" :key="i">
+            <!-- Step circle -->
+            <div
+              class="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300 flex-shrink-0"
+              :style="
+                i < step
+                  ? 'background-color: var(--brand-alpha); border: 2px solid var(--btn-primary-bg); color: var(--btn-primary-bg);'
+                  : i === step
+                    ? 'background-color: var(--btn-primary-bg); border: 2px solid var(--btn-primary-bg); color: #ffffff;'
+                    : 'background-color: transparent; border: 2px solid var(--step-inactive-bg); color: var(--step-inactive-text);'
+              "
+            >
+              <!-- Completed step: checkmark -->
+              <svg v-if="i < step" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              <span v-else>{{ i }}</span>
+            </div>
+
+            <!-- Connector line between steps -->
+            <div
+              v-if="i < TOTAL_STEPS"
+              class="flex-1 h-0.5 rounded-full transition-all duration-300 max-w-[2.5rem]"
+              :style="i < step ? 'background-color: var(--btn-primary-bg);' : 'background-color: var(--step-inactive-bg);'"
+            />
+          </template>
         </div>
-        <p class="text-[var(--text-muted)] text-sm mt-2">Paso {{ step }} de {{ TOTAL_STEPS }}</p>
+
+        <p class="text-xs mt-2 font-medium" style="color: var(--text-muted);">Paso {{ step }} de {{ TOTAL_STEPS }}</p>
       </div>
 
-      <div class="card p-6 space-y-4">
-        <!-- Paso 1 -->
+      <!-- ── Form card ──────────────────────────────────── -->
+      <div :key="step" class="card p-6 space-y-5">
+
+        <!-- ── Paso 1: Sobre ti ── -->
         <template v-if="step === 1">
-          <h2 class="text-lg font-semibold text-[var(--text-primary)] mb-2">Sobre ti</h2>
+          <div class="flex items-center gap-2.5 mb-1">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+              style="background-color: var(--brand-alpha);">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                :style="{ color: 'var(--btn-primary-bg)' }">
+                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z"/>
+              </svg>
+            </div>
+            <div>
+              <h2 class="text-lg font-bold" style="color: var(--text-primary);">Sobre ti</h2>
+              <p class="text-xs" style="color: var(--text-muted);">Tus datos de contacto y ubicación</p>
+            </div>
+          </div>
+
           <BaseInput v-model="form.client_name"  label="Nombre completo" required :error="errors.client_name" />
           <BaseInput v-model="form.client_phone" label="Teléfono" placeholder="+569..." required :error="errors.client_phone" />
-          <BaseInput v-model="form.client_email" label="Email" type="email" />
+          <BaseInput v-model="form.client_email" label="Email (opcional)" type="email" />
           <BaseInput v-model="form.region"   label="Región"   required :error="errors.region" />
           <BaseInput v-model="form.comuna"   label="Comuna"   required :error="errors.comuna" />
           <BaseInput v-model="form.address"  label="Dirección" required :error="errors.address" />
         </template>
 
-        <!-- Paso 2 -->
+        <!-- ── Paso 2: Tu mascota ── -->
         <template v-else-if="step === 2">
-          <h2 class="text-lg font-semibold text-[var(--text-primary)] mb-2">Tu mascota</h2>
+          <div class="flex items-center gap-2.5 mb-1">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+              style="background-color: var(--brand-alpha);">
+              <span style="font-size: 1rem; line-height: 1;">🐾</span>
+            </div>
+            <div>
+              <h2 class="text-lg font-bold" style="color: var(--text-primary);">Tu mascota</h2>
+              <p class="text-xs" style="color: var(--text-muted);">Datos del animal que recibirá la atención</p>
+            </div>
+          </div>
+
           <BaseInput  v-model="form.animal_name"    label="Nombre del animal" required :error="errors.animal_name" />
           <BaseSelect v-model="form.animal_species" label="Especie" required :options="ANIMAL_SPECIES" :error="errors.animal_species" />
           <BaseInput  v-model="form.animal_breed"   label="Raza (opcional)" />
@@ -121,51 +184,154 @@ async function submit() {
             :options="[{value:'macho',label:'Macho'},{value:'hembra',label:'Hembra'},{value:'desconocido',label:'Desconocido'}]" />
         </template>
 
-        <!-- Paso 3 -->
+        <!-- ── Paso 3: ¿Qué necesitas? ── -->
         <template v-else-if="step === 3">
-          <h2 class="text-lg font-semibold text-[var(--text-primary)] mb-2">¿Qué necesitas?</h2>
+          <div class="flex items-center gap-2.5 mb-1">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+              style="background-color: var(--brand-alpha);">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                :style="{ color: 'var(--btn-primary-bg)' }">
+                <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+              </svg>
+            </div>
+            <div>
+              <h2 class="text-lg font-bold" style="color: var(--text-primary);">¿Qué necesitas?</h2>
+              <p class="text-xs" style="color: var(--text-muted);">Cuéntanos sobre el servicio que buscas</p>
+            </div>
+          </div>
+
           <BaseSelect v-model="form.service_type" label="Tipo de servicio" required :options="SERVICE_TYPES" :error="errors.service_type" />
           <div>
-            <label class="label-base">Descripción del caso <span style="color: var(--text-error)">*</span></label>
-            <textarea v-model="form.description" rows="4" class="input-base resize-none"
-              placeholder="Describe el caso con al menos 20 caracteres..." />
-            <p v-if="errors.description" class="mt-1 text-xs" style="color: var(--text-error)">{{ errors.description }}</p>
+            <label class="label-base">
+              Descripción del caso
+              <span style="color: var(--text-error);">*</span>
+            </label>
+            <textarea
+              v-model="form.description"
+              rows="4"
+              class="input-base resize-none"
+              placeholder="Describe el caso con al menos 20 caracteres..."
+            />
+            <p v-if="errors.description" class="mt-1 text-xs" style="color: var(--text-error);">{{ errors.description }}</p>
           </div>
           <BaseSelect v-model="form.priority" label="Urgencia"
             :options="[{value:'normal',label:'Normal'},{value:'urgent',label:'Urgente'}]" />
         </template>
 
-        <!-- Paso 4 -->
+        <!-- ── Paso 4: Confirmación ── -->
         <template v-else>
-          <h2 class="text-lg font-semibold text-[var(--text-primary)] mb-2">Confirmar solicitud</h2>
-          <div class="space-y-3 text-sm">
-            <div class="bg-[var(--brand-alpha)] rounded-lg p-3 space-y-1">
-              <p class="text-[var(--text-muted)] text-xs uppercase tracking-wider mb-2">Datos personales</p>
-              <p><span class="text-[var(--text-secondary)]">Nombre:</span> <span class="text-[var(--text-primary)]">{{ form.client_name }}</span></p>
-              <p><span class="text-[var(--text-secondary)]">Teléfono:</span> <span class="text-[var(--text-primary)]">{{ form.client_phone }}</span></p>
-              <p><span class="text-[var(--text-secondary)]">Dirección:</span> <span class="text-[var(--text-primary)]">{{ form.comuna }}, {{ form.region }}</span></p>
+          <div class="flex items-center gap-2.5 mb-1">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+              style="background-color: var(--brand-alpha);">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                :style="{ color: 'var(--btn-primary-bg)' }">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
             </div>
-            <div class="bg-[var(--brand-alpha)] rounded-lg p-3 space-y-1">
-              <p class="text-[var(--text-muted)] text-xs uppercase tracking-wider mb-2">Mascota</p>
-              <p><span class="text-[var(--text-secondary)]">Nombre:</span> <span class="text-[var(--text-primary)]">{{ form.animal_name }}</span></p>
-              <p><span class="text-[var(--text-secondary)]">Especie:</span> <span class="text-[var(--text-primary)] capitalize">{{ form.animal_species }}</span></p>
-            </div>
-            <div class="bg-[var(--brand-alpha)] rounded-lg p-3 space-y-1">
-              <p class="text-[var(--text-muted)] text-xs uppercase tracking-wider mb-2">Solicitud</p>
-              <p><span class="text-[var(--text-secondary)]">Servicio:</span> <span class="text-[var(--text-primary)] capitalize">{{ form.service_type?.replace('_',' ') }}</span></p>
-              <p><span class="text-[var(--text-secondary)]">Descripción:</span> <span class="text-[var(--text-primary)]">{{ form.description }}</span></p>
+            <div>
+              <h2 class="text-lg font-bold" style="color: var(--text-primary);">Confirmar solicitud</h2>
+              <p class="text-xs" style="color: var(--text-muted);">Revisa los datos antes de enviar</p>
             </div>
           </div>
-          <p v-if="errors.submit" class="text-sm" style="color: var(--text-error)">{{ errors.submit }}</p>
+
+          <div class="space-y-3 text-sm">
+            <!-- Personal data -->
+            <div class="rounded-xl p-4 space-y-2"
+              style="background-color: var(--brand-alpha); border: 1px solid var(--border-color);">
+              <p class="text-xs font-semibold uppercase tracking-wider mb-2" style="color: var(--btn-primary-bg);">
+                Datos personales
+              </p>
+              <div class="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5">
+                <span style="color: var(--text-muted);">Nombre</span>
+                <span class="font-medium" style="color: var(--text-primary);">{{ form.client_name }}</span>
+                <span style="color: var(--text-muted);">Teléfono</span>
+                <span class="font-medium" style="color: var(--text-primary);">{{ form.client_phone }}</span>
+                <span v-if="form.client_email" style="color: var(--text-muted);">Email</span>
+                <span v-if="form.client_email" class="font-medium" style="color: var(--text-primary);">{{ form.client_email }}</span>
+                <span style="color: var(--text-muted);">Dirección</span>
+                <span class="font-medium" style="color: var(--text-primary);">{{ form.address }}, {{ form.comuna }}, {{ form.region }}</span>
+              </div>
+            </div>
+
+            <!-- Animal data -->
+            <div class="rounded-xl p-4 space-y-2"
+              style="background-color: var(--brand-alpha); border: 1px solid var(--border-color);">
+              <p class="text-xs font-semibold uppercase tracking-wider mb-2" style="color: var(--btn-primary-bg);">
+                Mascota
+              </p>
+              <div class="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5">
+                <span style="color: var(--text-muted);">Nombre</span>
+                <span class="font-medium" style="color: var(--text-primary);">{{ form.animal_name }}</span>
+                <span style="color: var(--text-muted);">Especie</span>
+                <span class="font-medium capitalize" style="color: var(--text-primary);">{{ form.animal_species }}</span>
+                <template v-if="form.animal_breed">
+                  <span style="color: var(--text-muted);">Raza</span>
+                  <span class="font-medium" style="color: var(--text-primary);">{{ form.animal_breed }}</span>
+                </template>
+                <template v-if="form.animal_sex">
+                  <span style="color: var(--text-muted);">Sexo</span>
+                  <span class="font-medium capitalize" style="color: var(--text-primary);">{{ form.animal_sex }}</span>
+                </template>
+              </div>
+            </div>
+
+            <!-- Service data -->
+            <div class="rounded-xl p-4 space-y-2"
+              style="background-color: var(--brand-alpha); border: 1px solid var(--border-color);">
+              <p class="text-xs font-semibold uppercase tracking-wider mb-2" style="color: var(--btn-primary-bg);">
+                Solicitud
+              </p>
+              <div class="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5">
+                <span style="color: var(--text-muted);">Servicio</span>
+                <span class="font-medium capitalize" style="color: var(--text-primary);">{{ form.service_type?.replace(/_/g, ' ') }}</span>
+                <span style="color: var(--text-muted);">Urgencia</span>
+                <span class="font-medium capitalize" style="color: var(--text-primary);">{{ form.priority }}</span>
+                <span style="color: var(--text-muted);">Descripción</span>
+                <span class="font-medium" style="color: var(--text-primary);">{{ form.description }}</span>
+              </div>
+            </div>
+          </div>
+
+          <p v-if="errors.submit" class="text-sm mt-1 text-center" style="color: var(--text-error);">
+            {{ errors.submit }}
+          </p>
         </template>
 
-        <!-- Acciones -->
-        <div class="flex gap-3 pt-2">
-          <BaseButton v-if="step > 1" variant="secondary" @click="prev">Atrás</BaseButton>
-          <BaseButton v-if="step < TOTAL_STEPS" class="flex-1" @click="next">Continuar →</BaseButton>
-          <BaseButton v-else class="flex-1" :loading="loading" @click="submit">Enviar solicitud</BaseButton>
+        <!-- ── Navigation buttons ── -->
+        <div class="flex gap-3 pt-1">
+          <button
+            v-if="step > 1"
+            type="button"
+            class="btn-secondary px-5 py-3"
+            @click="prev"
+          >
+            ← Atrás
+          </button>
+
+          <button
+            v-if="step < TOTAL_STEPS"
+            type="button"
+            class="btn-primary flex-1 py-3"
+            @click="next"
+          >
+            Continuar →
+          </button>
+
+          <button
+            v-else
+            type="button"
+            class="btn-primary flex-1 py-3"
+            :disabled="loading"
+            @click="submit"
+          >
+            <span v-if="loading" class="spinner" aria-hidden="true" />
+            <span>{{ loading ? 'Enviando…' : 'Enviar solicitud' }}</span>
+          </button>
         </div>
+
       </div>
+      <!-- end card -->
+
     </div>
   </div>
 </template>

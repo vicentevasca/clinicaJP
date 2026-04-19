@@ -296,6 +296,8 @@ button:focus-visible,
 @media (prefers-reduced-motion: reduce) {
   .hero-animate,
   .section-animate,
+  .testimonial-animate,
+  .faq-animate,
   .animate-in {
     animation: none !important;
     opacity: 1 !important;

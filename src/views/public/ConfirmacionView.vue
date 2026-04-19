@@ -12,52 +12,122 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen pt-16 bg-[var(--bg-primary)] flex items-center justify-center px-4">
-    <div class="max-w-md w-full text-center">
-      <div class="animate-in mb-8">
-        <div
-          role="img"
-          aria-label="Solicitud recibida"
-          class="w-24 h-24 rounded-full bg-[var(--brand-alpha)] border border-[var(--border-color)] flex items-center justify-center mx-auto mb-6"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 text-[var(--btn-primary-bg)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-          </svg>
-        </div>
-      </div>
-      <h1 class="text-3xl sm:text-4xl font-bold text-[var(--text-primary)] mb-4 animate-in">
-        ¡Solicitud<br />
-        <span class="text-[var(--btn-primary-bg)]">recibida!</span>
-      </h1>
-      <p class="text-[var(--text-secondary)] mb-6 leading-relaxed animate-in">
-        Hemos recibido tu solicitud de atención. Nuestro equipo se pondrá en contacto contigo a la brevedad para confirmar la fecha y hora de la visita.
-      </p>
+  <div
+    class="min-h-screen pt-16"
+    style="background-color: var(--bg-primary);"
+  >
+    <div class="flex items-center justify-center px-4 py-16">
+      <div class="max-w-md w-full mx-auto">
 
-      <div class="card p-5 mb-8 text-left animate-in">
-        <h3 class="text-sm font-semibold text-[var(--text-secondary)] mb-3">¿Qué sigue?</h3>
-        <div class="space-y-3">
-          <div class="flex items-start gap-3">
-            <span class="w-6 h-6 rounded-full bg-[var(--brand-alpha)] text-[var(--btn-primary-bg)] text-xs flex items-center justify-center flex-shrink-0 mt-0.5">1</span>
-            <p class="text-sm text-[var(--text-muted)]">Te contactamos por WhatsApp o llamada en menos de 2 horas hábiles</p>
+        <!-- Success icon -->
+        <div class="animate-in flex flex-col items-center mb-8">
+          <div
+            class="w-24 h-24 rounded-full flex items-center justify-center mb-6"
+            style="background-color: var(--brand-alpha); border: 2px solid var(--border-color);"
+          >
+            <div
+              class="w-16 h-16 rounded-full flex items-center justify-center"
+              style="background-color: var(--btn-primary-bg);"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="w-8 h-8"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="white"
+                stroke-width="2.5"
+                aria-hidden="true"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+              </svg>
+            </div>
           </div>
-          <div class="flex items-start gap-3">
-            <span class="w-6 h-6 rounded-full bg-[var(--brand-alpha)] text-[var(--btn-primary-bg)] text-xs flex items-center justify-center flex-shrink-0 mt-0.5">2</span>
-            <p class="text-sm text-[var(--text-muted)]">Confirmamos la dirección y agendamos la visita</p>
-          </div>
-          <div class="flex items-start gap-3">
-            <span class="w-6 h-6 rounded-full bg-[var(--brand-alpha)] text-[var(--btn-primary-bg)] text-xs flex items-center justify-center flex-shrink-0 mt-0.5">3</span>
-            <p class="text-sm text-[var(--text-muted)]">Llegamos a tu domicilio con todo lo necesario</p>
+
+          <!-- Headline -->
+          <h1 class="text-3xl sm:text-4xl font-bold text-center mb-3" style="color: var(--text-primary);">
+            ¡Tu solicitud fue enviada!
+          </h1>
+          <p class="text-center text-base" style="color: var(--text-secondary);">
+            Nos contactaremos contigo pronto.
+          </p>
+        </div>
+
+        <!-- "¿Qué sigue?" card -->
+        <div class="card p-6 mb-8 animate-in">
+          <h3
+            class="text-sm font-semibold uppercase tracking-wide mb-5"
+            style="color: var(--text-muted);"
+          >
+            ¿Qué sigue?
+          </h3>
+
+          <div class="space-y-5">
+            <!-- Step 1 -->
+            <div class="flex items-start gap-4">
+              <span
+                class="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold text-white mt-0.5"
+                style="background-color: var(--btn-primary-bg);"
+              >1</span>
+              <div>
+                <p class="text-sm font-semibold mb-0.5" style="color: var(--text-primary);">
+                  Te contactamos
+                </p>
+                <p class="text-sm" style="color: var(--text-muted);">
+                  Recibirás una llamada o WhatsApp en menos de 2 horas hábiles
+                </p>
+              </div>
+            </div>
+
+            <!-- Divider -->
+            <div class="ml-3.5 pl-8 border-l" style="border-color: var(--border-color);"></div>
+
+            <!-- Step 2 -->
+            <div class="flex items-start gap-4">
+              <span
+                class="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold text-white mt-0.5"
+                style="background-color: var(--btn-primary-bg);"
+              >2</span>
+              <div>
+                <p class="text-sm font-semibold mb-0.5" style="color: var(--text-primary);">
+                  Coordinamos la visita
+                </p>
+                <p class="text-sm" style="color: var(--text-muted);">
+                  Confirmamos dirección, horario y lo que necesita tu mascota
+                </p>
+              </div>
+            </div>
+
+            <!-- Divider -->
+            <div class="ml-3.5 pl-8 border-l" style="border-color: var(--border-color);"></div>
+
+            <!-- Step 3 -->
+            <div class="flex items-start gap-4">
+              <span
+                class="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold text-white mt-0.5"
+                style="background-color: var(--btn-primary-bg);"
+              >3</span>
+              <div>
+                <p class="text-sm font-semibold mb-0.5" style="color: var(--text-primary);">
+                  ¡Llegamos a tu casa!
+                </p>
+                <p class="text-sm" style="color: var(--text-muted);">
+                  El técnico veterinario llega con todo el equipamiento necesario
+                </p>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div class="flex flex-col sm:flex-row gap-3 justify-center animate-in">
-        <RouterLink to="/solicitar" class="btn-secondary">
-          Nueva solicitud
-        </RouterLink>
-        <RouterLink to="/" class="btn-primary">
-          Volver al inicio
-        </RouterLink>
+        <!-- Actions -->
+        <div class="animate-in flex flex-col sm:flex-row gap-3 justify-center">
+          <RouterLink to="/solicitar" class="btn-secondary text-center">
+            Nueva solicitud
+          </RouterLink>
+          <RouterLink to="/" class="btn-primary text-center">
+            Volver al inicio
+          </RouterLink>
+        </div>
+
       </div>
     </div>
   </div>

@@ -48,78 +48,118 @@ async function handleSubmit() {
 <template>
   <div class="w-full max-w-md mx-auto">
     <div class="card p-8 animate-in">
-      <!-- Header -->
+
+      <!-- Form header -->
       <div class="text-center mb-8">
-        <span role="img" aria-label="VetDesk" class="text-4xl mb-3 block">🐾</span>
-        <h2 class="text-2xl font-semibold text-[var(--text-primary)] mb-2">Mi Mascota</h2>
-        <p class="text-sm text-[var(--text-muted)]">Busca el expediente de tu mascota</p>
+        <h2 class="text-2xl font-bold mb-1.5" style="color: var(--text-primary);">
+          Busca tu mascota
+        </h2>
+        <p class="text-sm" style="color: var(--text-muted);">
+          Ingresa tu RUT o teléfono para acceder al expediente
+        </p>
       </div>
 
-      <!-- Toggle -->
-      <div class="flex rounded-lg bg-[var(--bg-secondary)] p-1 mb-6">
+      <!-- Segmented control toggle -->
+      <div
+        class="flex rounded-xl p-1 mb-6"
+        style="background-color: var(--bg-secondary); border: 1px solid var(--border-color);"
+      >
         <button
           type="button"
           @click="searchMode = 'rut'; error = ''"
-          :class="['flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all', searchMode === 'rut' ? 'bg-[var(--btn-primary-bg)] text-white' : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]']"
+          :class="['flex-1 py-2 px-3 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-1.5']"
+          :style="searchMode === 'rut'
+            ? 'background-color: var(--btn-primary-bg); color: #fff; box-shadow: 0 1px 4px var(--btn-primary-shadow);'
+            : 'background-color: transparent; color: var(--text-muted);'"
         >
-          <span aria-hidden="true">🔍</span> Buscar por RUT
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 104.5 4.5a7.5 7.5 0 0012.15 12.15z" />
+          </svg>
+          Buscar por RUT
         </button>
         <button
           type="button"
           @click="searchMode = 'phone'; error = ''"
-          :class="['flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all', searchMode === 'phone' ? 'bg-[var(--btn-primary-bg)] text-white' : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]']"
+          :class="['flex-1 py-2 px-3 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-1.5']"
+          :style="searchMode === 'phone'
+            ? 'background-color: var(--btn-primary-bg); color: #fff; box-shadow: 0 1px 4px var(--btn-primary-shadow);'
+            : 'background-color: transparent; color: var(--text-muted);'"
         >
-          <span aria-hidden="true">📱</span> Buscar por Teléfono
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 8.25h3" />
+          </svg>
+          Por Teléfono
         </button>
       </div>
 
       <!-- Form -->
       <form @submit.prevent="handleSubmit" class="space-y-4">
+
         <!-- RUT input -->
         <div v-if="searchMode === 'rut'">
-          <label class="block text-sm text-[var(--text-muted)] mb-1.5">RUT del dueño</label>
-          <input
-            v-model="rutInput"
-            type="text"
-            placeholder="12.345.678-9"
-            class="input-base w-full"
-            autocomplete="off"
-          />
-          <p v-if="rutError" class="text-xs mt-1" style="color: var(--text-error)">{{ rutError }}</p>
+          <label class="label-base mb-1.5 block">RUT del dueño</label>
+          <div class="relative">
+            <span
+              class="absolute left-3 top-1/2 -translate-y-1/2 text-base pointer-events-none select-none"
+              aria-hidden="true"
+            >🔍</span>
+            <input
+              v-model="rutInput"
+              type="text"
+              placeholder="Ej: 12.345.678-9"
+              class="input-base w-full pl-9"
+              autocomplete="off"
+            />
+          </div>
+          <p v-if="rutError" class="text-xs mt-1" style="color: var(--text-error);">{{ rutError }}</p>
         </div>
 
         <!-- Phone input -->
         <div v-else>
-          <label class="block text-sm text-[var(--text-muted)] mb-1.5">Teléfono registrado</label>
-          <input
-            v-model="phoneInput"
-            type="tel"
-            placeholder="+56 9 1234 5678"
-            class="input-base w-full"
-            autocomplete="tel"
-          />
-          <p v-if="phoneError" class="text-xs mt-1" style="color: var(--text-error)">{{ phoneError }}</p>
+          <label class="label-base mb-1.5 block">Teléfono registrado</label>
+          <div class="relative">
+            <span
+              class="absolute left-3 top-1/2 -translate-y-1/2 text-base pointer-events-none select-none"
+              aria-hidden="true"
+            >📱</span>
+            <input
+              v-model="phoneInput"
+              type="tel"
+              placeholder="Ej: +56 9 8765 4321"
+              class="input-base w-full pl-9"
+              autocomplete="tel"
+            />
+          </div>
+          <p v-if="phoneError" class="text-xs mt-1" style="color: var(--text-error);">{{ phoneError }}</p>
         </div>
 
-        <!-- Error -->
-        <p v-if="error" class="text-sm text-center" style="color: var(--text-error)">{{ error }}</p>
+        <!-- General error -->
+        <p v-if="error" class="text-sm text-center" style="color: var(--text-error);">{{ error }}</p>
 
         <!-- Submit -->
         <button type="submit" class="btn-primary w-full justify-center" :disabled="loading">
-          <span v-if="loading">Buscando...</span>
-          <span v-else>Buscar</span>
+          <span v-if="loading" class="flex items-center gap-2">
+            <span class="spinner w-4 h-4"></span>
+            Buscando...
+          </span>
+          <span v-else>Buscar expediente</span>
         </button>
       </form>
 
       <!-- Link to request -->
       <div class="mt-6 text-center">
-        <p class="text-xs text-[var(--text-muted)]">
-          ¿No tienes cuenta?
-          <RouterLink to="/solicitar" class="text-[var(--btn-primary-bg)] hover:opacity-80 transition-opacity">
+        <p class="text-xs" style="color: var(--text-muted);">
+          ¿Primera vez?
+          <RouterLink
+            to="/solicitar"
+            class="font-semibold transition-opacity hover:opacity-75"
+            style="color: var(--btn-primary-bg);"
+          >
             Solicitar una visita →
           </RouterLink>
         </p>
       </div>
+
     </div>
   </div>
 </template>
